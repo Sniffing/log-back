@@ -1,0 +1,27 @@
+{
+  "name": "log-back",
+  "version": "0.0.1",
+  "description": "back end",
+  "main": "server.js",
+  "dependencies": {
+    "@google-cloud/datastore": "^2.0.0",
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "multer": "^1.4.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sniffing/log-back.git"
+  },
+  "author": "Terence Tse",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Sniffing/log-back/issues"
+  },
+  "homepage": "https://github.com/Sniffing/log-back#readme"
+}
