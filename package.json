@@ -6,6 +6,7 @@
   "dependencies": {
     "@google-cloud/datastore": "^2.0.0",
     "body-parser": "^1.18.3",
+    "dotenv": "^6.1.0",
     "express": "^4.16.4",
     "multer": "^1.4.1"
   },
