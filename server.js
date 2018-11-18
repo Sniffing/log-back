@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 const express = require('express')
 var bodyParser = require('body-parser');
 var multer = require('multer');
@@ -10,13 +12,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 const Datastore = require('@google-cloud/datastore');
 const datastore = Datastore({
-  projectId: 'third-eye-184620'
+  projectId: process.env.APP_ID
 });
 
 // The kind for the new entity
 const kind = 'Log';
-// The Cloud Datastore key for the new entity
-const logKey = datastore.key(kind);
 
 // respond with "hello world" when a GET request is made to the homepage
 app.get('/', function (req, res) {
@@ -25,13 +25,28 @@ app.get('/', function (req, res) {
 
 app.post('/', upload.array(), function (req, res, next) {
   var body = req.body;
-
-  var test = formatData(body);
-  saveToCloud(test);
-  res.send(true);
+  var data = formatData(body);
+  saveIfDoesNotExist(data, res);
 })
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+
+let saveIfDoesNotExist = (data, res) => {
+  datastore.get(data.key)
+  .then((entity) => {
+    if (entity.length < 1 || (entity.length === 1 && entity[0] == undefined)) {
+      saveToCloud(data);
+      res.send(true);
+    } else {
+      console.log("entity already exists for date:", data.key.name);
+      res.send(false);
+    }
+  })
+  .catch((err) => {
+    console.log("Error searching for key", data.key);
+    res.send(false);
+  });
+}
 
 let metricsToList = (jsonState) => {
   var list = [];
@@ -46,7 +61,7 @@ let metricsToList = (jsonState) => {
 
 let formatData = (state) => {
   const data = {
-    key: logKey,
+    key: datastore.key([kind, state.dateState.date]),
     data: {
       date: state.dateState.date,
       weight: state.entryMetricState.weight,
@@ -61,9 +76,11 @@ let formatData = (state) => {
 let saveToCloud = (data) => {
   datastore.save(data)
   .then(() => {
-    console.log(`Saved ${data.key}: ${data.data}`);
+    console.log("Saved data with key: ", data.key);
+    return true;
   })
   .catch((err) => {
-    console.log("Error while saving to google cloud:", err)
+    console.log("Error while saving to google cloud:", err);
+    return false;
   })
 }
