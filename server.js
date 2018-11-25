@@ -6,6 +6,8 @@ var multer = require('multer');
 var upload = multer();
 const app = express()
 const port = 3000
+var log = require('loglevel');
+log.enableAll()
 
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -16,11 +18,10 @@ const datastore = Datastore({
 });
 
 // The kind for the new entity
-const kind = 'Log';
+const kind = 'Log3';
 
-// respond with "hello world" when a GET request is made to the homepage
 app.get('/', function (req, res) {
-  res.send('hello world')
+  res.send('Third eye')
 })
 
 app.post('/', upload.array(), function (req, res, next) {
@@ -29,21 +30,23 @@ app.post('/', upload.array(), function (req, res, next) {
   saveIfDoesNotExist(data, res);
 })
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+app.listen(port, () => {
+  log.info(`Third Eye listening on port ${port}!`)
+  log.info(`Be sure to run 'ngrok http ${port}'`);
+})
 
 let saveIfDoesNotExist = (data, res) => {
   datastore.get(data.key)
   .then((entity) => {
     if (entity.length < 1 || (entity.length === 1 && entity[0] == undefined)) {
-      saveToCloud(data);
-      res.send(true);
+      saveToCloud(data, res);
     } else {
-      console.log("entity already exists for date:", data.key.name);
+      log.info("Entry already exists for date:", data.key.name);
       res.send(false);
     }
   })
   .catch((err) => {
-    console.log("Error searching for key", data.key);
+    log.error("Error searching for key", data.key);
     res.send(false);
   });
 }
@@ -52,18 +55,23 @@ let metricsToList = (jsonState) => {
   var list = [];
   for (var key in jsonState) {
     if (jsonState[key]) {
-      list.push(key);
+      list.push(key.toLowerCase());
     }
   }
 
   return list;
 }
 
+let reverseDate = (date) => {
+  let parts = date.split("-");
+  return parts[2] + "-" + parts[1] + "-" + parts[0];
+}
+
 let formatData = (state) => {
   const data = {
-    key: datastore.key([kind, state.dateState.date]),
+    key: datastore.key([kind, reverseDate(state.dateState.date)]),
     data: {
-      date: state.dateState.date,
+      date: reverseDate(state.dateState.date),
       weight: state.entryMetricState.weight,
       keywords: state.keywordsState.keywords.concat(metricsToList(state.booleanMetricState)),
       text: state.textState.data,
@@ -73,14 +81,14 @@ let formatData = (state) => {
   return data;
 }
 
-let saveToCloud = (data) => {
+let saveToCloud = (data, res) => {
   datastore.save(data)
   .then(() => {
-    console.log("Saved data with key: ", data.key);
-    return true;
+    log.info("Saved data with key: ", data.key);
+    res.send(true);
   })
   .catch((err) => {
-    console.log("Error while saving to google cloud:", err);
-    return false;
+    log.error("Error while saving to google cloud:", err);
+    res.send(false);
   })
 }
