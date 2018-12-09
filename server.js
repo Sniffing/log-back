@@ -30,6 +30,21 @@ app.post('/', upload.array(), function (req, res, next) {
   saveIfDoesNotExist(data, res);
 })
 
+app.get('/entries', function(req, res) {
+  const query = datastore.createQuery(kind)
+                         .order('date');
+
+  query.run((err, entities) => {
+    const first = entities[0];
+    const last = entities[entities.length - 1];
+
+    res.send({
+      first: first.date,
+      last: last.date
+    });
+  });
+})
+
 app.listen(port, () => {
   log.info(`Third Eye listening on port ${port}!`)
   log.info(`Be sure to run 'ngrok http ${port}'`);
