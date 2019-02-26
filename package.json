@@ -6,15 +6,16 @@
   "dependencies": {
     "@google-cloud/datastore": "^2.0.0",
     "body-parser": "^1.18.3",
-    "dotenv": "^6.1.0",
+    "dotenv": "^6.2.0",
     "express": "^4.16.4",
     "loglevel": "^1.6.1",
-    "multer": "^1.4.1"
+    "multer": "^1.4.1",
+    "nodemon": "^1.18.10"
   },
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "nodemon server.js"
   },
   "repository": {
     "type": "git",
@@ -25,5 +26,10 @@
   "bugs": {
     "url": "https://github.com/Sniffing/log-back/issues"
   },
-  "homepage": "https://github.com/Sniffing/log-back#readme"
+  "homepage": "https://github.com/Sniffing/log-back#readme",
+  "nodemonConfig": {
+    "verbose": true,
+    "ignore": [],
+    "delay": "1000"
+  }
 }
