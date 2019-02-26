@@ -1,11 +1,11 @@
 require('dotenv').config()
-
+const path = require('path');
 const express = require('express')
 var bodyParser = require('body-parser');
 var multer = require('multer');
 var upload = multer();
 const app = express()
-const port = 3000
+const port = 4000
 var log = require('loglevel');
 log.enableAll()
 
@@ -20,8 +20,8 @@ const datastore = Datastore({
 // The kind for the new entity
 const kind = 'Log3';
 
-app.get('/', function (req, res) {
-  res.send('Third eye')
+app.get('/', function(req,res) {
+  res.sendFile(path.join(__dirname,'/webpage/build/','index.html'));
 })
 
 app.post('/', upload.array(), function (req, res, next) {
@@ -49,6 +49,44 @@ app.listen(port, () => {
   log.info(`Third Eye listening on port ${port}!`)
   log.info(`Be sure to run 'ngrok http ${port}'`);
 })
+
+app.get('/weight', function(req,res) {
+  let result = [];
+  const query = datastore.createQuery(kind)
+                         .filter('weight', ">", "0");
+  query.run((err, entities) => {
+    for (var i = 0; i < entities.length; i++) {
+      result.push({"date": entities[i].date, "weight": entities[i].weight});
+    }
+    res.send(result);
+  });
+});
+
+app.get('/keywords', function(req,res) {
+  const query = datastore.createQuery(kind);
+  let result = [];
+  query.run((err, entities) => {
+    console.log("There were %s entities retrieved", entities.length);
+
+    for (var i = 0; i < entities.length; i++) {
+      result.push({"date": entities[i].date, "keywords": entities[i].keywords})
+    }
+    res.send(result);
+  });
+});
+
+app.get('/text', function(req,res) {
+  const query = datastore.createQuery(kind);
+  let result = [];
+  query.run((err, entities) => {
+    console.log("There were %s entities retrieved", entities.length);
+
+    for (var i = 0; i < entities.length; i++) {
+      result.push({"date": entities[i].date, "text": entities[i].text})
+    }
+    res.send(result);
+  });
+});
 
 let saveIfDoesNotExist = (data, res) => {
   datastore.get(data.key)
