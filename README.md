@@ -1,4 +1,5 @@
 # log-back
+Self note, run npm start in the webpage package as well
 
 Back-end server for log.
 
