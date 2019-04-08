@@ -12,8 +12,8 @@ class App extends Component {
       <div className="App">
         <header className="App-header">
           <p> Welcome to your third eye </p>
-          <KeywordsCount/>
-
+          {/*<KeywordsCount/> */}
+          <LineWeight/>
         </header>
       </div>
     );
