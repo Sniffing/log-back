@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { LineChart, CartesianGrid, XAxis, YAxis, Line } from 'recharts';
+import { LineChart, CartesianGrid, XAxis, YAxis, Line, Tooltip } from 'recharts';
 import moment from 'moment';
 
 class LineWeight extends Component {
@@ -54,6 +54,9 @@ class LineWeight extends Component {
                ticks={this.state.data.map(({date, weight}) => date) }
                tickFormatter={(tick) => moment(tick).format('DD/MM/YY')}/>
         <YAxis dataKey='weight' type='number' domain={['dataMin - 2', 'dataMax + 2']}/>
+        <Tooltip
+          formatter={(value) => `${value}kg`}
+        />
         <Line type="monotone" dataKey='weight' stroke="#8884d8" />
       </LineChart>
     );
