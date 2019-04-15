@@ -1,9 +1,12 @@
 import React, { Component } from 'react';
-import LineWeight from './Charts/LineWeight'
-import KeywordsCount from './Charts/KeywordsCount'
-import BarChartKeywords from './Charts/BarChartKeywords'
-import CalendarHeatMap from './Charts/CalendarHeatMap'
+import { Switch, Route } from 'react-router-dom';
+import WeightPage from './Pages/WeightPage';
+import Router from './Pages/Router';
 import './App.css';
+
+const Home = () => (
+  <p> Welcome to your third eye </p>
+);
 
 class App extends Component {
 
@@ -11,9 +14,9 @@ class App extends Component {
     return (
       <div className="App">
         <header className="App-header">
-          <p> Welcome to your third eye </p>
-          {/*<KeywordsCount/> */}
-          <LineWeight/>
+          <Route exact path='/' component={ Home } />
+          <Route path='/weight' component={ WeightPage } />
+          <Router />
         </header>
       </div>
     );
