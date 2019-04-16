@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Switch, Route } from 'react-router-dom';
 import WeightPage from './Pages/WeightPage';
+import KeywordPage from './Pages/KeywordPage';
 import Router from './Pages/Router';
 import './App.css';
 
@@ -16,6 +17,7 @@ class App extends Component {
         <header className="App-header">
           <Route exact path='/' component={ Home } />
           <Route path='/weight' component={ WeightPage } />
+          <Route path='/keywords' component={ KeywordPage } />
           <Router />
         </header>
       </div>
