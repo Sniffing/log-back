@@ -1,25 +1,28 @@
 import React from 'react';
 import { Card } from 'antd';
 import { Link } from 'react-router-dom';
+import * as Constants from '../constants'
 
-const Router = () => (
-  <div>
-    <Link to='/'>
+const Router = () => {
+  const pages = Constants.pages;
+  const cards = pages.map(route =>
+    <Link to={`/${route}`}>
       <Card>
-        <p> Home </p>
+        <p>{route}</p>
       </Card>
     </Link>
-    <Link to='/weight'>
-      <Card>
-        <p> Weight </p>
-      </Card>
-    </Link>
-    <Link to='/keywords'>
-      <Card>
-        <p> Words </p>
-      </Card>
-    </Link>
-  </div>
-);
+  );
+
+  return (
+    <div>
+      <Link to='/'>
+        <Card>
+          <p> Home </p>
+        </Card>
+      </Link>
+      {cards}
+    </div>
+  );
+}
 
 export default Router;
