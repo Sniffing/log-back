@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import { Switch, Route } from 'react-router-dom';
+import { Route } from 'react-router-dom';
 import WeightPage from './Pages/WeightPage';
 import KeywordPage from './Pages/KeywordPage';
-import DancePage from './Pages/DancePage';
+import CalendarPage from './Pages/CalendarPage';
 import Router from './Pages/Router';
 import './App.css';
 
@@ -19,7 +19,7 @@ class App extends Component {
           <Route exact path='/' component={ Home } />
           <Route path='/weight' component={ WeightPage } />
           <Route path='/keywords' component={ KeywordPage } />
-          <Route path='/dance' component={ DancePage } />
+          <Route path='/calendar' component={ CalendarPage } />
           <Router />
         </header>
       </div>

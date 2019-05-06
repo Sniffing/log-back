@@ -1,1 +1,1 @@
-export const pages = ['weight', 'keywords', 'dance'];
+export const pages = ['weight', 'keywords', 'calendar'];
