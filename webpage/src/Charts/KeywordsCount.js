@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Select, Input } from 'antd';
+import { Select } from 'antd';
 import NumericInput from '../CustomComponents/NumericInput'
 
 const { Option } = Select;
