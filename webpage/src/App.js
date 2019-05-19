@@ -4,12 +4,8 @@ import WeightPage from './Pages/WeightPage';
 import KeywordPage from './Pages/KeywordPage';
 import CalendarPage from './Pages/CalendarPage';
 import MemoryPage from './Pages/MemoryPage';
-import Router from './Pages/Router';
+import Home from './Pages/Home';
 import './App.css';
-
-const Home = () => (
-  <p> Welcome to your third eye </p>
-);
 
 class App extends Component {
 
@@ -22,7 +18,6 @@ class App extends Component {
           <Route path='/keywords' component={ KeywordPage } />
           <Route path='/calendar' component={ CalendarPage } />
           <Route path='/memory' component={ MemoryPage } />
-          <Router />
         </header>
       </div>
     );
