@@ -3,7 +3,7 @@ import { Card } from 'antd';
 import { Link } from 'react-router-dom';
 import * as Constants from '../constants'
 
-const Router = () => {
+const Home = () => {
   const pages = Constants.pages;
   const cards = pages.map(route =>
     <Link to={`/${route}`}>
@@ -15,14 +15,10 @@ const Router = () => {
 
   return (
     <div>
-      <Link to='/'>
-        <Card>
-          <p> Home </p>
-        </Card>
-      </Link>
+      <p> Welcome to your third eye </p>
       {cards}
     </div>
   );
 }
 
-export default Router;
+export default Home;
