@@ -6,7 +6,7 @@ import * as Constants from '../constants'
 const Home = () => {
   const pages = Constants.pages;
   const cards = pages.map(route =>
-    <Link to={`/${route}`}>
+    <Link to={`/${route}`} key={route}>
       <Card>
         <p>{route}</p>
       </Card>
