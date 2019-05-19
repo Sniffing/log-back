@@ -17,26 +17,17 @@ class App extends Component {
 
   handleClick = (e) => {
     let { history } = this.props;
-    
+
     this.setState({
       current: e.key,
     });
 
     switch(e.key) {
-      case 'weight':
-        history.push({ pathname:'weight' });
-        break;
-      case 'keywords':
-        history.push({ pathname:'keywords' });
-        break;
-      case 'calendar':
-        history.push({ pathname:'calendar' });
-        break;
-      case 'memory':
-        history.push({ pathname:'memory' });
+      case 'home':
+        history.push({ pathname:'/' });
         break;
       default:
-        history.push({ pathname:'/' });
+        history.push({ pathname:e.key });
     }
   };
 
