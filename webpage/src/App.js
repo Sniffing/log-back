@@ -10,7 +10,6 @@ import { pages } from './constants';
 import './App.css';
 
 class App extends Component {
-
   state = {
     current: 'home',
   };

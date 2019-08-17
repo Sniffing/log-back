@@ -135,7 +135,7 @@ class LineWeight extends Component {
                  tickFormatter={(tick) => moment(tick).format('DD/MM/YY')}/>
           <YAxis dataKey='weight' type='number' domain={['dataMin - 2', 'dataMax + 2']}/>
           <Tooltip
-            formatter={(value) => `${value}kg`}
+            formatter={(v,n,props) => { return (v, moment(props.payload.date).format('DD/MM/YY')) }}
           />
           <Line type="monotone" dataKey='weight' stroke="#8884d8" />
         </LineChart>
