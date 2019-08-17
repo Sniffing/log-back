@@ -1,18 +1,49 @@
 import React, { Component } from 'react';
+import { Route, withRouter } from 'react-router-dom';
+import { observer } from 'mobx-react';
+import { observable } from 'mobx';
+import { Menu, Icon } from 'antd';
 import logo from './logo.svg';
 import './App.css';
+import { ClickParam } from 'antd/lib/menu';
 
+const pages = ['weight', 'keywords', 'calendar', 'memory'];
+
+
+@observer
 class App extends Component {
-  render() {
+  @observable
+  private current: string = "";
+
+  public render() {
+    const routeOptions = pages.map(page =>
+      <Menu.Item key={page}>{page}</Menu.Item>
+    );
+
     return (
       <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to React</h2>
-        </div>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
+        {/* <Menu onClick={this.handleClick} selectedKeys={[this.current]} mode="horizontal">
+            <Menu.Item key="home">
+              <Icon type="home" />
+            </Menu.Item>
+            <Menu.SubMenu
+              title={
+                <span className="submenu-title-wrapper">
+                  <Icon type="down-circle" />
+                  {this.current}
+                </span>
+              }
+            >
+              {routeOptions}
+            </Menu.SubMenu>
+        </Menu> */}
+        <header className="App-header">
+          {/* <Route exact path='/' component={ Home } />
+          <Route path='/weight' component={ WeightPage } />
+          <Route path='/keywords' component={ KeywordPage } />
+          <Route path='/calendar' component={ CalendarPage } />
+          <Route path='/memory' component={ MemoryPage } /> */}
+        </header>
       </div>
     );
   }
