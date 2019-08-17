@@ -8,7 +8,9 @@ import * as serviceWorker from './serviceWorker';
 
 ReactDOM.render(
   <BrowserRouter>
+  <Provider>
     <App />
+  </Provider>
   </BrowserRouter>,
   document.getElementById('root'));
 
