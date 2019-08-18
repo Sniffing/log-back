@@ -8,6 +8,7 @@ import Home from './pages/home';
 import CalendarPage from './pages/calendar';
 import WeightPage from './pages/weight';
 import KeywordPage from './pages/keyword';
+import MemoryPage from './pages/memory';
 
 const pages = ['weight', 'keywords', 'calendar', 'memory'];
 
@@ -44,7 +45,7 @@ class App extends Component {
           <Route path='/weight' component={ WeightPage } />
           <Route path='/keywords' component={ KeywordPage } />
           <Route path='/calendar' component={ CalendarPage } />
-          {/* <Route path='/memory' component={ MemoryPage } /> */}
+          <Route path='/memory' component={ MemoryPage } />
         </header>
       </div>
     );
