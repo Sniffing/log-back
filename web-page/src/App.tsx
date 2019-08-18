@@ -3,9 +3,11 @@ import { Route, withRouter } from 'react-router-dom';
 import { observer } from 'mobx-react';
 import { observable } from 'mobx';
 import { Menu, Icon } from 'antd';
-import logo from './logo.svg';
 import './App.css';
-import { ClickParam } from 'antd/lib/menu';
+import Home from './pages/home';
+import CalendarPage from './pages/calendar';
+import WeightPage from './pages/weight';
+import KeywordPage from './pages/keyword';
 
 const pages = ['weight', 'keywords', 'calendar', 'memory'];
 
@@ -38,11 +40,11 @@ class App extends Component {
             </Menu.SubMenu>
         </Menu> */}
         <header className="App-header">
-          {/* <Route exact path='/' component={ Home } />
+          <Route exact path='/' component={ Home } />
           <Route path='/weight' component={ WeightPage } />
           <Route path='/keywords' component={ KeywordPage } />
           <Route path='/calendar' component={ CalendarPage } />
-          <Route path='/memory' component={ MemoryPage } /> */}
+          {/* <Route path='/memory' component={ MemoryPage } /> */}
         </header>
       </div>
     );
