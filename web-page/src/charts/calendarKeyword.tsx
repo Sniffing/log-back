@@ -1,14 +1,20 @@
 import React, { Component } from 'react';
 import CalendarHeatmap from 'react-calendar-heatmap';
 import './calendar.css';
-import { Select } from 'antd';
-import { observer } from 'mobx-react';
+import { Select, message } from 'antd';
+import { observer, inject } from 'mobx-react';
 import { observable, action } from 'mobx';
+import { RootStore, KeywordEntry } from '../stores/rootStore';
 
 const { Option } = Select;
 
+interface IProps {
+  rootStore?: RootStore;
+}
+
+@inject('rootStore')
 @observer
-class CalendarKeyword extends Component {
+class CalendarKeyword extends Component<IProps> {
   
 @observable
 private searchTerm: string =  "";
@@ -22,18 +28,23 @@ private dateList: any[] = [];
 @observable
 private data: any[] = [];
 
+@action
 public async componentDidMount() {
-    this.setState({searchTerm: "dance"});
-    this.callApi()
-        .then(res => {
-        this.parseResults(res)
-        })
-        .catch(err => console.log(err));
+    this.searchTerm = "dance";
+    if (!this.props.rootStore) {
+      return;
+    }
+
+    try {
+      await this.props.rootStore.fetchKeywords();
+      this.parseResults(this.props.rootStore.keywordsData);
+    } catch (err) {
+      message.error("Could not fetch keywords");
+    }
 }
 
 @action
-public parseResults = (res: any) => {
-    this.dates = res;
+public parseResults = (res: KeywordEntry[]) => {
     let dates = [];
     for (var i=0; i < this.data.length; i++) {
       let obj = this.data[i];
@@ -41,30 +52,29 @@ public parseResults = (res: any) => {
         dates.push(obj.date)
     }
 
-    this.setState({dates: dates});
+    this.dates = dates;
 
     this.dates.sort((a,b) => {
       return a.name - b.name
     });
 
     const dateList = dates.map(d => ({date: d}));
-    this.setState({dateList: dateList, count: 1});
+    this.dateList = dateList;
   }
 
-  public callApi = async () => {
-    const response = await fetch('http://localhost:3000/keywords');
-    const body = await response.json();
-    if (response.status !== 200) throw Error(body.message);
-    return body;
-  };
+  @action
+  private onChange = async (value: any) => {
+    if (!this.props.rootStore) {
+      return;
+    }
 
-  private onChange = (value: any) => {
-    this.setState({searchTerm: value});
-    this.callApi()
-      .then(res => {
-        this.parseResults(res)
-      })
-      .catch(err => console.log(err));
+    this.searchTerm = value;
+    try {
+      await this.props.rootStore.fetchKeywords();
+      this.parseResults(this.props.rootStore.keywordsData);
+    } catch  {
+      message.error("Could not search keywords");
+    }
   }
 
   public render() {

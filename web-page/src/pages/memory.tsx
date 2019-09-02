@@ -1,5 +1,5 @@
 import React from 'react'
-import MemorySnippet from '../CustomComponents/MemorySnippet'
+import MemorySnippet from '../custom-components/memorySnippet'
 
 const MemoryPage = () => {
   return (
@@ -8,6 +8,5 @@ const MemoryPage = () => {
     </div>
   )
 }
-
 
 export default MemoryPage;

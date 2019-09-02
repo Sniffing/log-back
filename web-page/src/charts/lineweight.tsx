@@ -1,13 +1,29 @@
 import React, { Component } from 'react';
 import { LineChart, CartesianGrid, XAxis, YAxis, Line, Tooltip } from 'recharts';
-import { DatePicker } from 'antd';
+import { DatePicker, message } from 'antd';
 import moment from 'moment';
-import { observer } from 'mobx-react';
-import { observable } from 'mobx';
+import { observer, inject } from 'mobx-react';
+import { observable, action, runInAction } from 'mobx';
+import { RootStore } from '../stores/rootStore';
 const { RangePicker } = DatePicker;
 
+interface IProps {
+  rootStore?: RootStore;
+}
+
+interface WeightEntry {
+  date: string, 
+  weight: string,
+}
+
+interface FormattedWeightEntry {
+  date: number,
+  weight: number,
+}
+
+@inject('rootStore')
 @observer
-class LineWeight extends Component {
+class LineWeight extends Component<IProps> {
     @observable
     private data: any[] = [];
 
@@ -23,67 +39,65 @@ class LineWeight extends Component {
     @observable
     private currentData: any[] = [];
 
-
-  async componentDidMount() {
-    this.callApi()
-        .then(res => {
-          const reformattedResults = res.map((item: any) => {
-              
-            return {
-              date: Date.parse(item.date),
-              weight: parseFloat(item.weight),
-            }
-          })
-
-          reformattedResults.sort((a: any, b: any) => {
-            const aDate = new Date(a.date);
-            const bDate = new Date(b.date);
-            return aDate > bDate;
-          });
-
-          this.setState({
-            data: reformattedResults,
-            currentData: reformattedResults,
-            startDate: reformattedResults[0].date,
-            earliestDate: reformattedResults[0].date,
-            endDate: reformattedResults[reformattedResults.length-1].date
-          });
-        })
-        .catch(err => {
-          console.log(err);
-        });
+  public constructor(props: IProps) {
+    super(props);
+    
   }
 
-  callApi = async () => {
-    const response = await fetch('/weight');
-    const body = await response.json();
-    if (response.status !== 200) throw Error(body.message);
-    return body;
-  };
+  public async componentDidMount() {
+    if (!this.props.rootStore) {
+      return;
+    }
 
+    try {
+      await this.props.rootStore.fetchWeightData();
+      const data = this.props.rootStore.weightData;
+
+      const reformattedResults: FormattedWeightEntry[] = data.map((item: WeightEntry) => {
+        const entry: FormattedWeightEntry = {
+          date: Date.parse(item.date),
+          weight: parseFloat(item.weight),
+        }
+        return entry;
+      })
+
+      reformattedResults.sort((a: FormattedWeightEntry, b: FormattedWeightEntry) => {
+        const aDate = new Date(a.date);
+        const bDate = new Date(b.date);
+        return aDate > bDate ? 1 : -1;
+      });
+
+      runInAction(() => {
+        this.data = reformattedResults;
+        this.currentData = reformattedResults;
+        this.startDate = reformattedResults.length ? reformattedResults[0].date : null;
+        this.earliestDate = reformattedResults.length ? reformattedResults[0].date : null;
+        this.endDate = reformattedResults.length ? reformattedResults[reformattedResults.length - 1].date : null;
+      });
+    } catch (err) {
+      message.error("Could not fetch weight data");
+    }
+  }
+
+  // @action
 //   private changeDateRange = ([newStart, newEnd]) => {
 //     if (newStart !== undefined) {
-//       this.setState({
-//         startDate: newStart.unix() * 1000,
-//       });
+//       this.startDate = newStart.unix() * 1000;
 //       console.log("settin new strt:", this.startDate);
 //     }
 //     if (newEnd !== undefined) {
-//       this.setState({
-//         endDate: newEnd.unix() * 1000,
-//       });
+//       this.endDate = newEnd.unix() * 1000;
 //       console.log("setting new end:", this.endDate);
 //     }
 
-//     const filteredData = this.data
-//                                 .filter(data => {
-//                                     return data.date >= this.startDate && data.date < this.endDate;
-//                                 });
-//     this.setState({
-//       currentData: filteredData,
+//     const filteredData = this.data.filter(data => {
+//       return data.date >= this.startDate && data.date < this.endDate;
+//     });
+//     this.currentData = filteredData;
 //     });
 //   }
 
+    @action
     private changeStartDate = (newStart: any) => {
     if (newStart !== undefined) {
       const newStartUnix = newStart.unix() * 1000;
@@ -92,14 +106,14 @@ class LineWeight extends Component {
         return data.date >= newStartUnix && data.date < this.endDate;
       });
 
-      this.setState({
-        startDate: newStartUnix,
-        currentData: filteredData,
-      });
+      this.startDate = newStartUnix;
+      this.currentData = filteredData;
+
       console.log("settin new strt:", this.state);
     }
   }
 
+  @action
   private changeEndDate = (newEnd: any) => {
     if (newEnd !== undefined) {
       const newEndUnix = newEnd.unix() * 1000;
@@ -109,10 +123,8 @@ class LineWeight extends Component {
         return data.date >= this.startDate && data.date < newEndUnix;
       });
 
-      this.setState({
-        endDate: newEndUnix,
-        currentData: filteredData,
-      });
+      this.endDate = newEndUnix;
+      this.currentData = filteredData;
     }
   }
 
