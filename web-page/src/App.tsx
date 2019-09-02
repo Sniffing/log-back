@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { Route, withRouter } from 'react-router-dom';
-import { observer } from 'mobx-react';
+import { Route } from 'react-router-dom';
+import { Provider, observer } from 'mobx-react';
 import { observable } from 'mobx';
 import { Menu, Icon } from 'antd';
 import './App.css';
@@ -9,6 +9,8 @@ import CalendarPage from './pages/calendar';
 import WeightPage from './pages/weight';
 import KeywordPage from './pages/keyword';
 import MemoryPage from './pages/memory';
+
+import rootStore from './stores/rootStore';
 
 const pages = ['weight', 'keywords', 'calendar', 'memory'];
 
@@ -24,6 +26,10 @@ class App extends Component {
     );
 
     return (
+    
+    <Provider
+      rootStore={rootStore}
+      >
       <div className="App">
         {/* <Menu onClick={this.handleClick} selectedKeys={[this.current]} mode="horizontal">
             <Menu.Item key="home">
@@ -48,6 +54,7 @@ class App extends Component {
           <Route path='/memory' component={ MemoryPage } />
         </header>
       </div>
+      </Provider>
     );
   }
 }

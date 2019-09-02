@@ -1,17 +1,23 @@
 import React, { Component } from 'react';
-import { Select } from 'antd';
+import { Select, message } from 'antd';
 import NumericInput from '../custom-components/numericInput';
-import { observer } from 'mobx-react';
+import { observer, inject } from 'mobx-react';
 import { observable, runInAction, action } from 'mobx';
+import { RootStore } from '../stores/rootStore';
 
 const { Option } = Select;
+
+interface IProps {
+  rootStore?: RootStore;
+}
 
 interface IGenericObject<T> {
     [key: string]: T;
 }
 
+@inject('rootStore')
 @observer
-class KeywordsCount extends Component {
+class KeywordsCount extends Component<IProps> {
     @observable
     private bannedList: string[] = [];
 
@@ -34,42 +40,39 @@ class KeywordsCount extends Component {
     private cutoff: number = 0;
 
   public async componentDidMount() {
-    this.callApi()
-      .then(res => {
-          runInAction(() => {
-            this.data = res;
-          })
-        
-        let localDictionary: IGenericObject<number> = {};
-        for (var i = 0; i < this.data.length; i++) {
-          const obj: any = this.data[i];
+    if (!this.props.rootStore) {
+      return;
+    }
 
-          for (var j = 0; j < obj.keywords.length; j++) {
-              const word: string = obj.keywords[j];
-            if (!localDictionary.hasOwnProperty(word)){
-              localDictionary[word] = 1;
-            } else {
-              localDictionary[word] += 1;
-            }
+    try {
+      await this.props.rootStore.fetchKeywords();
+      this.data = this.props.rootStore.keywordsData;      
+          
+      let localDictionary: IGenericObject<number> = {};
+      for (var i = 0; i < this.data.length; i++) {
+        const obj: any = this.data[i];
+
+        for (var j = 0; j < obj.keywords.length; j++) {
+            const word: string = obj.keywords[j];
+          if (!localDictionary.hasOwnProperty(word)){
+            localDictionary[word] = 1;
+          } else {
+            localDictionary[word] += 1;
           }
         }
+      }
 
-        runInAction(() => {
-            this.dictionary = localDictionary;
-            this.sortAndFilterKeywords([]);
-            this.fullList = Object.keys(this.dictionary);
-            this.activeList = Object.keys(this.dictionary);
-        })
-      })
-      .catch(err => console.log(err));
+      runInAction(() => {
+          this.dictionary = localDictionary;
+          this.sortAndFilterKeywords([]);
+          this.fullList = Object.keys(this.dictionary);
+          this.activeList = Object.keys(this.dictionary);
+      });
+
+    } catch (err) {
+      message.error("Could not fetch keywords");
+    }
   }
-
-  private callApi = async () => {
-    const response = await fetch('http://localhost:3000/keywords');
-    const body = await response.json();
-    if (response.status !== 200) throw Error(body.message);
-    return body;
-  };
 
   @action
   private updateBlackList = (blacklist: any) => {

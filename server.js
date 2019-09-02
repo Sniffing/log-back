@@ -21,7 +21,7 @@ const datastore = Datastore({
 const kind = 'Log3';
 
 app.get('/', function(req,res) {
-  res.sendFile(path.join(__dirname,'/webpage/build/','index.html'));
+  res.sendFile(path.join(__dirname,'/web-page/public/','index.html'));
 })
 
 app.post('/', upload.array(), function (req, res, next) {
@@ -56,7 +56,7 @@ app.get('/weight', function(req,res) {
                          .filter('weight', ">", "0");
   query.run((err, entities) => {
     for (var i = 0; i < entities.length; i++) {
-      result.push({"date": entities[i].date, "weight": entities[i].weight});
+      result.push({date: entities[i].date, weight: entities[i].weight});
     }
     res.send(result);
   });
