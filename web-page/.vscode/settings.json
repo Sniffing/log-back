@@ -1,0 +1,8 @@
+{
+    "eslint.autoFixOnSave": true,
+    "eslint.alwaysShowStatus": true,
+    "prettier.jsxSingleQuote": true,
+    "[typescriptreact]": {
+        "editor.formatOnSave": true
+    }
+}
