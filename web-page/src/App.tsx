@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import { Route } from 'react-router-dom';
+import { Route, RouteComponentProps } from 'react-router-dom';
+import { withRouter } from 'react-router';
 import { Provider, observer } from 'mobx-react';
-import { observable } from 'mobx';
+import { observable, action } from 'mobx';
 import { Menu, Icon } from 'antd';
 import './App.css';
 import Home from './pages/home';
@@ -11,14 +12,21 @@ import KeywordPage from './pages/keyword';
 import MemoryPage from './pages/memory';
 
 import rootStore from './stores/rootStore';
+import { ClickParam } from 'antd/lib/menu';
 
 const pages = ['weight', 'keywords', 'calendar', 'memory'];
 
 
 @observer
-class App extends Component {
+class App extends Component<RouteComponentProps> {
   @observable
   private current: string = "";
+
+  @action
+  private handleClick = (param: ClickParam) => {
+    this.current = param.key;
+    this.props.history.push(`/${pages.includes(this.current) ? this.current : '' }`);
+  }
 
   public render() {
     const routeOptions = pages.map(page =>
@@ -31,7 +39,7 @@ class App extends Component {
       rootStore={rootStore}
       >
       <div className="App">
-        {/* <Menu onClick={this.handleClick} selectedKeys={[this.current]} mode="horizontal">
+        <Menu onClick={this.handleClick} selectedKeys={[this.current]} mode="horizontal">
             <Menu.Item key="home">
               <Icon type="home" />
             </Menu.Item>
@@ -45,18 +53,18 @@ class App extends Component {
             >
               {routeOptions}
             </Menu.SubMenu>
-        </Menu> */}
-        <header className="App-header">
+        </Menu>
+        <body className="App-body">
           <Route exact path='/' component={ Home } />
           <Route path='/weight' component={ WeightPage } />
           <Route path='/keywords' component={ KeywordPage } />
           <Route path='/calendar' component={ CalendarPage } />
           <Route path='/memory' component={ MemoryPage } />
-        </header>
+        </body>
       </div>
       </Provider>
     );
   }
 }
 
-export default App;
+export default withRouter(App);

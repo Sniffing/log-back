@@ -1,21 +1,21 @@
-import React, { Component } from 'react'
-import { Button, Card, message } from 'antd'
-import { observable, runInAction, action } from 'mobx';
-import { observer, inject } from 'mobx-react';
-import { RootStore, Memory } from '../stores/rootStore';
+import React, { Component } from "react";
+import { Button, Card, message } from "antd";
+import { observable, runInAction, action } from "mobx";
+import { observer, inject } from "mobx-react";
+import { RootStore, Memory } from "../stores/rootStore";
 
 interface IProps {
   rootStore?: RootStore;
 }
 
-@inject('rootStore')
+@inject("rootStore")
 @observer
 class MemorySnippet extends Component<IProps> {
-    @observable
-    private data: Memory[] = [];
+  @observable
+  private data: Memory[] = [];
 
-    @observable
-    private current: any;
+  @observable
+  private current: any;
 
   async componentDidMount() {
     if (!this.props.rootStore) {
@@ -44,26 +44,22 @@ class MemorySnippet extends Component<IProps> {
 
     console.log(this.data[random]);
     this.current = this.data[random];
-  }
+  };
 
   render() {
     return (
       <div>
-        <Button
-          type="primary"
-          icon="redo"
-          onClick={this.rollNewMemory}
-        >
+        <Button type="primary" icon="redo" onClick={this.rollNewMemory}>
           Random Memory
         </Button>
 
-            {this.current ? <Card
-                title={`${this.current.date}`}
-                style={{ width: 300 }}
-            >
-                <p>{this.current.text}</p>
-            </Card> : <></>}
-        
+        {this.current ? (
+          <Card title={`${this.current.date}`} style={{ width: 300 }}>
+            <p>{this.current.text}</p>
+          </Card>
+        ) : (
+          <></>
+        )}
       </div>
     );
   }

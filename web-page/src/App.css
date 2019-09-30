@@ -1,5 +1,7 @@
 .App {
   text-align: center;
+  height: 100%;
+  width: 100%;
 }
 
 .App-logo {
@@ -14,6 +16,16 @@
   color: white;
 }
 
+.App-body {
+  height: 100%;
+  width: 100%;
+}
+
+#root {
+  height: 100%;
+  width: 100%;
+}
+
 .App-intro {
   font-size: large;
 }
@@ -21,4 +33,20 @@
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+.h1 {
+  font-size: '16px';
+  text-align: center;
+  font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif
+}
+
+.weight-page {
+  height: 100%;
+  width: 100%;
+}
+
+.page-loader {
+  text-align: center;
+  vertical-align: middle;
 }

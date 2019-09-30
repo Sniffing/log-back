@@ -1,4 +1,4 @@
-import { observable, runInAction } from "mobx";
+import { observable, runInAction, action } from "mobx";
 import get from 'axios';
 
 export interface WeightEntry {
@@ -18,6 +18,9 @@ export interface Memory {
 
 export class RootStore {
     @observable
+    public isFetchingData: boolean = false;
+
+    @observable
     public weightData: WeightEntry[] = [];
 
     @observable
@@ -26,7 +29,9 @@ export class RootStore {
     @observable
     public memories: Memory[] = [];
 
+    @action
     public async fetchWeightData() {
+        this.isFetchingData = true;
         try {
             const response = await get('/weight');
             runInAction(() => {
@@ -34,10 +39,14 @@ export class RootStore {
             });
         } catch (err) {
             throw new Error(err);
+        } finally {
+            this.isFetchingData = false;
         }
     }
 
+    @action
     public async fetchKeywords() {
+        this.isFetchingData = true;
         try {
             const response = await get('/keywords');
             runInAction(() => {
@@ -45,10 +54,14 @@ export class RootStore {
             })
         } catch (err) {
             throw new Error(err);
+        } finally {
+            this.isFetchingData = false;
         }
     }
 
+    @action
     public async fetchMemory() {
+        this.isFetchingData = true;
         try {
             const response = await get('/text');
             runInAction(() => {
@@ -56,6 +69,8 @@ export class RootStore {
             })
         } catch (err) {
             throw new Error(err);
+        } finally {
+            this.isFetchingData = false;
         }
     }
 
