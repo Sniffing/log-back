@@ -1,18 +1,24 @@
 import React, { Component } from "react";
 import {
-  LineChart,
-  CartesianGrid,
+  XYPlot,
   XAxis,
   YAxis,
-  Line,
-  Tooltip
-} from "recharts";
-import { DatePicker, message } from "antd";
+  HorizontalGridLines,
+  LineSeries,
+  LineSeriesPoint,
+  VerticalGridLines,
+  Crosshair,
+  DiscreteColorLegend
+} from "react-vis";
+import { DatePicker, message, Card, Slider } from "antd";
 import moment from "moment";
 import { observer, inject } from "mobx-react";
 import { observable, action, runInAction, computed } from "mobx";
 import { RootStore } from "../stores/rootStore";
 import { PacmanLoader } from "react-spinners";
+import { Utils } from "../App.utils";
+import regression, { Result } from "regression";
+import { SliderValue } from "antd/lib/slider";
 
 const { RangePicker } = DatePicker;
 
@@ -34,19 +40,19 @@ interface FormattedWeightEntry {
 @observer
 class LineWeight extends Component<IProps> {
   @observable
-  private data: any[] = [];
+  private data: FormattedWeightEntry[] = [];
 
   @observable
-  private startDate: any;
+  private startDate: number = 0;
 
   @observable
-  private endDate: any;
+  private endDate: number = 0;
 
   @observable
-  private earliestDate: any;
+  private earliestDate: number = 0;
 
   @observable
-  private currentData: any[] = [];
+  private currentData: FormattedWeightEntry[] = [];
 
   public constructor(props: IProps) {
     super(props);
@@ -84,17 +90,74 @@ class LineWeight extends Component<IProps> {
         this.currentData = reformattedResults;
         this.startDate = reformattedResults.length
           ? reformattedResults[0].date
-          : null;
+          : -1;
         this.earliestDate = reformattedResults.length
           ? reformattedResults[0].date
-          : null;
+          : -1;
         this.endDate = reformattedResults.length
           ? reformattedResults[reformattedResults.length - 1].date
-          : null;
+          : -1;
       });
     } catch (err) {
       message.error("Could not fetch weight data");
     }
+  }
+
+  @computed
+  private get graphData() {
+    return this.data.map(d => {
+      const entry: LineSeriesPoint = {
+        x: d.date,
+        y: d.weight
+      };
+      return entry;
+    });
+  }
+
+  @computed
+  private get lineOfBestFit() {
+    const base = this.data[0];
+    const line: Result = regression.polynomial(
+      this.data.map(d => {
+        return [d.date - base.date, d.weight];
+      }),
+      {
+        order: this.fitCloseness,
+        precision: 75
+      }
+    );
+
+    const answer = line.points.map(point => {
+      return {
+        x: point[0] + base.date,
+        y: point[1]
+      };
+    });
+    return answer;
+  }
+
+  @computed
+  private get averageWeight() {
+    return this.data.length
+      ? this.data.map(d => d.weight).reduce((acc, item) => acc + item) /
+          this.data.length
+      : 0;
+  }
+
+  @computed
+  private get average() {
+    return this.data.length > 0
+      ? [
+          {
+            x: this.data[0].date,
+            y: this.averageWeight
+          },
+          {
+            x: this.data[this.data.length - 1].date,
+            y: this.averageWeight
+          }
+        ]
+      : [];
   }
 
   // @action
@@ -161,6 +224,17 @@ class LineWeight extends Component<IProps> {
     }
   }
 
+  @observable
+  private crosshairValues: any[] = [];
+
+  @observable
+  private fitCloseness: number = 4;
+
+  @action
+  private handlePrecisionChange = (value: SliderValue) => {
+    this.fitCloseness = typeof value === "number" ? value : 4;
+  };
+
   render() {
     return (
       <>
@@ -173,16 +247,24 @@ class LineWeight extends Component<IProps> {
               width: "100%"
             }}
           >
-            <span>Fetching weight data...</span>
-
-            <div className="page-loader">
-              <PacmanLoader />
-            </div>
+            <Card className="loading-card">
+              <div style={{ marginBottom: "10px" }}>
+                Fetching weight data...
+              </div>
+              <PacmanLoader color={"#1E78AA"} size={30} />
+            </Card>
           </div>
         )}
 
         {this.finishedLoading && (
           <>
+            <Slider
+              min={2}
+              max={7}
+              range={false}
+              onChange={this.handlePrecisionChange}
+              value={this.fitCloseness}
+            />
             <DatePicker
               disabledDate={this.disabledDate}
               onChange={this.changeStartDate}
@@ -200,27 +282,55 @@ class LineWeight extends Component<IProps> {
               //   format="YYYY-MM-DD"
               // />
             }
-            <LineChart width={750} height={250} data={this.currentData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis
-                dataKey="date"
-                domain={[this.startDate, this.endDate]}
-                type="number"
-                ticks={this.currentData.map(({ date, weight }) => date)}
-                tickFormatter={tick => moment(tick).format("DD/MM/YY")}
-              />
-              <YAxis
-                dataKey="weight"
-                type="number"
-                domain={["dataMin - 2", "dataMax + 2"]}
-              />
-              <Tooltip
-                formatter={(v, n, props) => {
-                  return moment(props.payload.date).format("DD/MM/YY");
+            <XYPlot xType="time" width={800} height={300}>
+              <HorizontalGridLines />
+              <VerticalGridLines />
+              <LineSeries
+                color="red"
+                data={this.graphData}
+                onNearestXY={(dataPoint, { index }) => {
+                  runInAction(() => (this.crosshairValues = [dataPoint]));
+                }}
+                onSeriesMouseOut={() => {
+                  runInAction(() => (this.crosshairValues = []));
                 }}
               />
-              <Line type="monotone" dataKey="weight" stroke="#8884d8" />
-            </LineChart>
+              <XAxis title="Date" />
+              <YAxis title="Weight (kg)" />
+              <Crosshair
+                values={this.crosshairValues}
+                titleFormat={(d: LineSeriesPoint) => ({
+                  title: "Date",
+                  value: Utils.unixTimeToDate(d[0].x)
+                })}
+                itemsFormat={(d: LineSeriesPoint) => [
+                  { title: "Weight", value: d[0].y.toFixed(1) }
+                ]}
+              />
+              <LineSeries
+                color="blue"
+                data={this.lineOfBestFit}
+                onNearestXY={(dataPoint, { index }) => {
+                  runInAction(() => (this.crosshairValues = [dataPoint]));
+                }}
+                onSeriesMouseOut={() => {
+                  runInAction(() => (this.crosshairValues = []));
+                }}
+              />
+              <LineSeries color="green" data={this.average} />
+            </XYPlot>
+            <DiscreteColorLegend
+              orientation={"vertical"}
+              onItemClick={() => {}}
+              items={[
+                {
+                  title: `Average Weight: ${this.averageWeight.toFixed(1)}kg`,
+                  color: "green"
+                },
+                { title: "Weight", color: "red" },
+                { title: "Trend Weight", color: "blue" }
+              ]}
+            />
           </>
         )}
       </>
