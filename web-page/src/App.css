@@ -35,10 +35,10 @@
   to { transform: rotate(360deg); }
 }
 
-.h1 {
-  font-size: '16px';
+h1 {
+  font-size: 16px;
   text-align: center;
-  font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif
+  font-family: Arial, Helvetica, sans-serif
 }
 
 .weight-page {
@@ -46,7 +46,16 @@
   width: 100%;
 }
 
+.loading-card {
+  text-align: center;
+  top: 30%;
+  display: inline-block;
+  width: 200px;
+  height: 140px;
+}
+
 .page-loader {
   text-align: center;
   vertical-align: middle;
+  height: 100%;
 }
