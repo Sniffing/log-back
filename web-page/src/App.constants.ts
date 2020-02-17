@@ -6,6 +6,10 @@ enum Pages {
     MEMORY = 'memory',
 }
 
+export interface IGenericObject<T> {
+    [key: string]: T;
+}
+
 class Constants {
 
     public static pages = [

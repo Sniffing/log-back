@@ -8,14 +8,13 @@ import './App.css';
 import Home from './pages/home';
 import CalendarPage from './pages/calendar';
 import WeightPage from './pages/weight';
-import KeywordPage from './pages/keyword';
+import KeywordPage from './keywords/keyword';
 import MemoryPage from './pages/memory';
 
 import rootStore from './stores/rootStore';
 import { ClickParam } from 'antd/lib/menu';
 
 const pages = ['weight', 'keywords', 'calendar', 'memory'];
-
 
 @observer
 class App extends Component<RouteComponentProps> {
@@ -38,7 +37,7 @@ class App extends Component<RouteComponentProps> {
     <Provider
       rootStore={rootStore}
       >
-      <div className="App">
+      <div className="App rain">
         <Menu onClick={this.handleClick} selectedKeys={[this.current]} mode="horizontal">
             <Menu.Item key="home">
               <Icon type="home" />
