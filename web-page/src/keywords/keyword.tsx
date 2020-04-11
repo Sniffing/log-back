@@ -1,26 +1,21 @@
 import React from "react";
-import KeywordsCount from "./keywordTreeMap";
-import { Select, message } from 'antd';
+import { message } from 'antd';
 import { RootStore } from '../stores/rootStore';
 import { inject, observer } from 'mobx-react';
 import { observable, runInAction, action } from 'mobx';
 import NumericInput from '../custom-components/numericInput';
-import { object } from 'prop-types';
-import KeywordList from './keywordList';
+import { pull } from 'lodash';
+import { IGenericObject } from '../App.constants';
+import { dummyData, WordCount, KeywordDays, KeywordList, KeywordTreemap, KeywordMonths } from './';
 
-const { Option } = Select;
 
 interface IProps {
   rootStore?: RootStore;
 }
 
-interface IGenericObject<T> {
-  [key: string]: T;
-}
-
 @inject("rootStore")
 @observer
-class KeywordPage extends React.Component<IProps> {
+export class KeywordPage extends React.Component<IProps> {
   @observable
   private bannedList: string[] = [];
 
@@ -34,13 +29,13 @@ class KeywordPage extends React.Component<IProps> {
   private data: any[] = [];
 
   @observable
-  private cutoff: number = 10;
+  private cutoff: number = 5;
 
   @observable
   private dictionary: IGenericObject<number> = {};
 
   @observable
-  private displayTerms: any;
+  private displayTerms: WordCount[] = [];
 
   public async componentDidMount() {
     if (!this.props.rootStore) {
@@ -48,8 +43,9 @@ class KeywordPage extends React.Component<IProps> {
     }
 
     try {
-      await this.props.rootStore.fetchKeywords();
-      this.data = this.props.rootStore.keywordsData; 
+      // await this.props.rootStore.fetchKeywords();
+      // this.data = this.props.rootStore.keywordsData; 
+      this.data = dummyData;
     
       runInAction(() => {
         this.dictionary = this.countWords();
@@ -80,19 +76,23 @@ class KeywordPage extends React.Component<IProps> {
   }
 
   @action
-  private updateBlackList = (blacklist: any) => {
-    this.bannedList = blacklist;
-    this.activeList = this.fullList.filter(x => blacklist.includes(x));
-    this.sortAndFilterKeywords(blacklist);
-  };
+  private toggleInBlackList = (word: string) => {
+    if(this.bannedList.includes(word)) {
+      pull(this.bannedList, word);
+    } else {
+      this.bannedList.push(word);
+    }
+    this.activeList = this.fullList.filter(x => this.bannedList.includes(x));
+    this.sortAndFilterKeywords(this.bannedList);
+  }
   
   private filterAmount = (value: any) => { 
     this.cutoff = value || 0;
     this.sortAndFilterKeywords(this.bannedList, value);
   };
 
-  private sortAndFilterKeywords = (blacklist: any, value = 0) => {
-    const displayTerms = Object.entries(this.dictionary)
+  private sortAndFilterKeywords = (blacklist: any, value = 0): WordCount[] => {
+    const displayTerms: WordCount[] = Object.entries(this.dictionary)
       .filter(entry => !blacklist.includes(entry[0]))
       .filter((entry: any[]) => (value > 0 ? entry[1] > value : true))
       .map(entry => ({ key: entry[0], value: entry[1] }));
@@ -109,16 +109,16 @@ class KeywordPage extends React.Component<IProps> {
     return (
       <div className="keyword-page">
         <h2>Number of days recorded: {this.data.length || " loading ..."} </h2>
-        <KeywordsCount data={this.displayTerms} minCount={this.cutoff}/>
+        {/* <KeywordDays data={this.data} dictionary={this.displayTerms}/> */}
+        <KeywordMonths data={this.data}/>
+        <KeywordTreemap data={this.displayTerms} minCount={this.cutoff}/>
         <NumericInput value={this.cutoff} onChange={this.filterAmount}/>
         <KeywordList 
           list={this.displayTerms} 
-          updateList={this.updateBlackList}
+          updateList={this.toggleInBlackList}
           minCount={this.cutoff}
           />
       </div>
     );
   }
 }
-
-export default KeywordPage;
