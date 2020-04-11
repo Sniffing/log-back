@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { observer } from "mobx-react";
 import { Treemap } from 'recharts';
-import { observable } from 'mobx';
 
 interface IProps {
   data: any[];
@@ -9,7 +8,7 @@ interface IProps {
 }
 
 @observer
-class KeywordsCount extends Component<IProps> {
+export class KeywordTreemap extends Component<IProps> {
   public render() {
     const vw = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
     const vh = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
@@ -44,5 +43,3 @@ class KeywordsCount extends Component<IProps> {
     );
   }
 }
-
-export default KeywordsCount;

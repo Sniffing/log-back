@@ -1,9 +1,10 @@
 import React from 'react';
 import { Row, Col, Button } from 'antd';
-import { observable, computed } from 'mobx';
+import { observable, computed, action } from 'mobx';
 import { IGenericObject } from '../App.constants';
 import { chunk } from 'lodash';
 import { observer } from 'mobx-react';
+import { KeywordTag } from './';
 
 interface IProps {
   list: any[];
@@ -12,52 +13,55 @@ interface IProps {
 }
 
 @observer
-class KeywordList extends React.Component<IProps> {
+export class KeywordList extends React.Component<IProps> {
   @observable
   private checkMap: IGenericObject<boolean>  = {};
 
-  @computed
-  private get filteredList() {
-    if (!this.props.list) return [];
-    return this.props.list.filter(item => item.value > this.props.minCount);
+  @observable
+  private originalList: any[] = [];
+
+  @action
+  public componentWillReceiveProps(newProps: IProps) {
+    if (newProps.list && this.originalList.length === 0) {
+      this.originalList = newProps.list;
+    }
   }
 
-  private isChecked = (item: string): boolean => {
-    console.log(this.checkMap);
-    
-    return this.checkMap.hasOwnProperty(item) && this.checkMap[item];
+  @computed
+  private get filteredList() {
+    if (!this.originalList) return [];
+    return this.originalList.filter(item => item.value > this.props.minCount);
   }
 
   private toggleCheck = (item: string) => {
     this.checkMap[item] = !this.checkMap[item];
+    this.props.updateList(item);
   }
 
   render() {
     const columns = 4;
     const lists = chunk(this.filteredList, this.filteredList.length / columns);
-    console.log(lists);
+    const hasRemainder = lists.length % columns !== 0;
+    const columnWidth = Math.floor(24/(columns + (hasRemainder ? 1 : 0)));
     
     return(
       <Row gutter={16}> 
         {lists.map(list => (
-          <Col span={24/columns}>
+          <Col span={columnWidth}>
             {(list||[]).map((item) => {
               return (
-                <Button 
-                  type="link"
-                  ghost={this.isChecked(item.key)}
-                  onClick={() => this.toggleCheck(item.key)}
-                >
-                  {item.key} - {item.value}
-                </Button> 
+                <Row>
+                  <KeywordTag
+                    onChange={() => this.toggleCheck(item.key)}>
+                    {item.key} - {item.value}
+                  </KeywordTag>
+                </Row>
               )
             })}
-        </Col>
+          </Col>
         ))
       }
       </Row>
     )
   }
 }
-
-export default KeywordList;

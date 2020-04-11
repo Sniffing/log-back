@@ -8,7 +8,7 @@ import './App.css';
 import Home from './pages/home';
 import CalendarPage from './pages/calendar';
 import WeightPage from './pages/weight';
-import KeywordPage from './keywords/keyword';
+import { KeywordPage } from './keywords/keyword';
 import MemoryPage from './pages/memory';
 
 import rootStore from './stores/rootStore';
