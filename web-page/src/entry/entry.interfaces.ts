@@ -1,4 +1,13 @@
-import { Rule } from 'antd/lib/form';
+import { EntryFormFieldsEnum } from '.';
+import { Moment } from 'moment';
+
+export interface IEntryFormValues {
+  [EntryFormFieldsEnum.DATE]: Moment;
+  [EntryFormFieldsEnum.SET_EMOTIONS]?: string[];
+  [EntryFormFieldsEnum.FREE_EMOTIONS]?: string[];
+  [EntryFormFieldsEnum.WEIGHT]?: IEntryMetric;
+  [EntryFormFieldsEnum.THOUGHTS]?: string;
+}
 
 export interface ILogEntry {
   dateState: IDate;
