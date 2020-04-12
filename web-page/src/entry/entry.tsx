@@ -1,7 +1,20 @@
 import * as React from "react";
 import { inject, observer } from "mobx-react";
 import { RootStore, ILastDates } from "../stores/rootStore";
-import { ILogEntry, IFormProps } from "./";
+import {
+  ILogEntry,
+  IFormProps,
+  defaultFormValues,
+  dateFormat,
+  convertLogEntryToFormValues,
+  convertFormValuesToLogEntry,
+  IEntryFormValues,
+  entryFormFields,
+  EntryFormFieldsConfigs,
+  EntryFormFieldsEnum,
+  BooleanMetric,
+  booleanMetricKeys
+} from "./";
 import {
   message,
   Form,
@@ -17,36 +30,15 @@ import moment, { Moment } from "moment";
 import TextArea from "antd/lib/input/TextArea";
 import TagsInput from "react-tagsinput";
 import { FormInstance, Rule } from "antd/lib/form";
-import {
-  entryFormFields,
-  EntryFormFieldsConfigs,
-  EntryFormFieldsEnum
-} from "./entry-form-fields";
 import { ValidateErrorEntity } from "rc-field-form/lib/interface";
-import { observable, action } from "mobx";
-import { IEntryFormValues } from "./entry.interfaces";
+import { observable, action, toJS } from "mobx";
+
+import "react-tagsinput/react-tagsinput.css";
+import { remove } from "lodash";
 
 interface IProps {
   rootStore?: RootStore;
 }
-
-const dateFormat = "YYYY/MM/DD";
-const booleanEntries: string[] = [
-  "happy",
-  "sad",
-  "sick",
-  "lonely",
-  "stress",
-  "overate",
-  "dance",
-  "gym"
-];
-
-const defaultFormValues: IEntryFormValues = {
-  [EntryFormFieldsEnum.DATE]: moment(),
-  [EntryFormFieldsEnum.SET_EMOTIONS]: [],
-  [EntryFormFieldsEnum.FREE_EMOTIONS]: []
-};
 
 @inject("rootStore")
 @observer
@@ -60,6 +52,9 @@ export class EntryPage extends React.Component<IProps> {
   private dates?: ILastDates;
 
   @observable
+  private selectedBooleanMetrics: string[] = [];
+
+  @observable
   private formValues: IEntryFormValues = defaultFormValues;
 
   public constructor(props: IProps) {
@@ -70,7 +65,7 @@ export class EntryPage extends React.Component<IProps> {
     if (this.props.rootStore) {
       const dates = await this.props.rootStore.fetchLastDates();
       this.dates = dates;
-      this.setLogEntry(this.makeEntry(moment(dates.last).toDate()));
+      this.setLogEntry(this.makeEntry(moment.utc(dates.last)));
       this.setFormValues();
     }
   }
@@ -80,11 +75,12 @@ export class EntryPage extends React.Component<IProps> {
     this.logEntry = entry;
   };
 
-  private makeEntry = (date: Date = new Date()) => {
+  private makeEntry = (date: Moment = moment.utc()) => {
     return {
       dateState: {
-        date
+        date: date.format(dateFormat)
       },
+      booleanMetricState: {},
       keywordsState: {
         keywords: []
       },
@@ -96,26 +92,13 @@ export class EntryPage extends React.Component<IProps> {
 
   @action
   private setFormValues = () => {
-    const formValues = this.convertLogEntryToFormValues();
+    const formValues = convertLogEntryToFormValues(this.logEntry);
     this.formRef.current?.setFieldsValue(formValues);
   };
 
-  private convertLogEntryToFormValues = (): IEntryFormValues => {
-    if (!this.logEntry) return defaultFormValues;
-
-    return {
-      [EntryFormFieldsEnum.DATE]: moment(this.logEntry.dateState.date),
-      [EntryFormFieldsEnum.SET_EMOTIONS]: this.logEntry.booleanMetricState
-        ? Object.keys(this.logEntry.booleanMetricState)
-        : [],
-      [EntryFormFieldsEnum.FREE_EMOTIONS]: this.logEntry.keywordsState.keywords,
-      [EntryFormFieldsEnum.WEIGHT]: this.logEntry.entryMetricState,
-      [EntryFormFieldsEnum.THOUGHTS]: this.logEntry.textState.data
-    };
-  };
-
   private handleFinish = async (value: any) => {
-    const entry = value as ILogEntry;
+    const values = value as IEntryFormValues;
+    const entry: ILogEntry = convertFormValuesToLogEntry(values);
     const { rootStore } = this.props;
 
     if (!rootStore) {
@@ -125,11 +108,17 @@ export class EntryPage extends React.Component<IProps> {
 
     try {
       await rootStore.saveEntry(entry);
-      message.success(`Saved data for ${entry.dateState?.date.toDateString()}`);
+      message.success(`Saved data for ${entry.dateState?.date}`);
+      this.formRef.current?.resetFields();
+
+      const currUtc = moment(entry.dateState.date)
+        .utc()
+        .add(-moment().utcOffset(), "m");
+
+      this.setLogEntry(this.makeEntry(currUtc.add(1, "day")));
+      this.setFormValues();
     } catch (error) {
-      message.error(
-        `Error saving data for ${entry.dateState?.date.toDateString()}`
-      );
+      message.error(`Error saving data for ${entry.dateState?.date}`);
       console.error(error);
     }
   };
@@ -139,16 +128,69 @@ export class EntryPage extends React.Component<IProps> {
   };
 
   private get booleanMetricRadioElements() {
-    return booleanEntries.map((entry: string) => {
-      return <Radio.Button>{entry}</Radio.Button>;
-    });
+    return Array.from(booleanMetricKeys).map(
+      (entry: BooleanMetric | string) => {
+        return (
+          <Radio.Button
+            value={entry}
+            checked={this.selectedBooleanMetrics.includes(entry)}
+            onClick={this.handleBooleanMetricChange}
+          >
+            {entry}
+          </Radio.Button>
+        );
+      }
+    );
   }
 
+  @action
+  private handleBooleanMetricChange = (event: any) => {
+    const { value } = event.target;
+
+    if (booleanMetricKeys.has(value)) {
+      if (this.selectedBooleanMetrics.includes(value)) {
+        remove(this.selectedBooleanMetrics, v => v === value);
+      } else {
+        this.selectedBooleanMetrics.push(value);
+      }
+
+      this.formRef.current?.setFieldsValue({
+        [EntryFormFieldsEnum.SET_EMOTIONS]: this.selectedBooleanMetrics
+      });
+    }
+  };
+
   private handleDateChange = (value: Moment | null, dateString: string) => {
-    console.log("date changed", value, dateString);
-    // this.formRef.current?.setFieldsValue({
-    //   [EntryFormFieldsEnum.DATE]: value
-    // });
+    this.formRef.current?.setFieldsValue({
+      [EntryFormFieldsEnum.DATE]: value
+    });
+  };
+
+  private handleTagChange = (value: string[]) => {
+    this.formRef.current?.setFieldsValue({
+      [EntryFormFieldsEnum.FREE_EMOTIONS]: value
+    });
+    console.log(this.formRef.current?.getFieldsValue());
+  };
+
+  private handleWeightChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const cryAndThenKeto = event.target?.value;
+    this.formRef.current?.setFieldsValue({
+      [EntryFormFieldsEnum.WEIGHT]: cryAndThenKeto
+    });
+  };
+
+  private handleThoughtsChange = (
+    event: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    const text = event.target?.value;
+    this.formRef.current?.setFieldsValue({
+      [EntryFormFieldsEnum.THOUGHTS]: text
+    });
+  };
+
+  private disableDatesAfterLastEntry = (current: Moment) => {
+    return current && current > moment(this.dates?.last).endOf("day");
   };
 
   private getFormField = (field: EntryFormFieldsEnum) => {
@@ -157,7 +199,12 @@ export class EntryPage extends React.Component<IProps> {
 
     switch (field) {
       case EntryFormFieldsEnum.DATE:
-        component = <DatePicker onChange={this.handleDateChange} />;
+        component = (
+          <DatePicker
+            disabledDate={this.disableDatesAfterLastEntry}
+            onChange={this.handleDateChange}
+          />
+        );
         break;
       case EntryFormFieldsEnum.SET_EMOTIONS:
         component = (
@@ -175,15 +222,15 @@ export class EntryPage extends React.Component<IProps> {
           <TagsInput
             value={[]}
             inputProps={{ placeholder: "Add another emotion..." }}
-            onChange={() => {}}
+            onChange={this.handleTagChange}
           />
         );
         break;
       case EntryFormFieldsEnum.WEIGHT:
-        component = <Input />;
+        component = <Input onChange={this.handleWeightChange} />;
         break;
       case EntryFormFieldsEnum.THOUGHTS:
-        component = <TextArea rows={6} />;
+        component = <TextArea onChange={this.handleThoughtsChange} rows={6} />;
         break;
     }
 
