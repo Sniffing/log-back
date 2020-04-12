@@ -12,7 +12,7 @@ export interface IEntryFormValues {
 export interface ILogEntry {
   dateState: IDate;
   booleanMetricState?: IBooleanMetrics;
-  entryMetricState?: IEntryMetric;
+  entryMetricState: IEntryMetric;
   keywordsState: IKeyword;
   textState: IText;
 }

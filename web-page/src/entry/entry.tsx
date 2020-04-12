@@ -34,7 +34,7 @@ import { ValidateErrorEntity } from "rc-field-form/lib/interface";
 import { observable, action, toJS } from "mobx";
 
 import "react-tagsinput/react-tagsinput.css";
-import { remove } from "lodash";
+import { remove, flatten } from "lodash";
 
 interface IProps {
   rootStore?: RootStore;
@@ -65,7 +65,13 @@ export class EntryPage extends React.Component<IProps> {
     if (this.props.rootStore) {
       const dates = await this.props.rootStore.fetchLastDates();
       this.dates = dates;
-      this.setLogEntry(this.makeEntry(moment.utc(dates.last)));
+
+      const last = moment(dates.last)
+        .utc()
+        .add(-moment().utcOffset(), "m")
+        .add(1, "day");
+
+      this.setLogEntry(this.makeEntry(last));
       this.setFormValues();
     }
   }
@@ -80,6 +86,7 @@ export class EntryPage extends React.Component<IProps> {
       dateState: {
         date: date.format(dateFormat)
       },
+      entryMetricState: {},
       booleanMetricState: {},
       keywordsState: {
         keywords: []
@@ -107,6 +114,7 @@ export class EntryPage extends React.Component<IProps> {
     }
 
     try {
+      console.log("saving", entry);
       await rootStore.saveEntry(entry);
       message.success(`Saved data for ${entry.dateState?.date}`);
       this.formRef.current?.resetFields();
@@ -167,8 +175,15 @@ export class EntryPage extends React.Component<IProps> {
   };
 
   private handleTagChange = (value: string[]) => {
+    const emotions = flatten(
+      value.map((v: string) => {
+        return v.split(" ").filter(x => x.length > 0);
+      })
+    );
+
+    console.log(emotions);
     this.formRef.current?.setFieldsValue({
-      [EntryFormFieldsEnum.FREE_EMOTIONS]: value
+      [EntryFormFieldsEnum.FREE_EMOTIONS]: emotions
     });
     console.log(this.formRef.current?.getFieldsValue());
   };

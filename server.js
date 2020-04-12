@@ -128,7 +128,7 @@ const formatData = (state) => {
     data: {
       date: reverseDate(state.dateState.date),
       weight: state.entryMetricState.weight,
-      keywords: state.keywordsState.keywords.concat(metricsToList(state.booleanMetricState)),
+      keywords: state.keywordsState.keywords.map(k => k.toLowerCase()).concat(metricsToList(state.booleanMetricState)),
       text: state.textState.data,
     }
   }
