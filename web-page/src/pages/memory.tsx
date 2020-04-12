@@ -1,12 +1,12 @@
-import React from "react";
+import * as React from "react";
 import MemorySnippet from "../custom-components/memorySnippet";
 
-const MemoryPage = () => {
-  return (
-    <div className="memory-page">
-      <MemorySnippet />
-    </div>
-  );
-};
-
-export default MemoryPage;
+export class MemoryPage extends React.Component {
+  public render() {
+    return (
+      <div className="memory-page">
+        <MemorySnippet />
+      </div>
+    );
+  }
+}

@@ -1,13 +1,17 @@
 import React from "react";
-import { message } from 'antd';
-import { RootStore } from '../stores/rootStore';
-import { inject, observer } from 'mobx-react';
-import { observable, runInAction, action } from 'mobx';
-import NumericInput from '../custom-components/numericInput';
-import { pull } from 'lodash';
-import { IGenericObject } from '../App.constants';
-import { dummyData, WordCount, KeywordDays, KeywordList, KeywordTreemap, KeywordMonths } from './';
-
+import { message } from "antd";
+import { RootStore } from "../stores/rootStore";
+import { inject, observer } from "mobx-react";
+import { observable, runInAction, action } from "mobx";
+import NumericInput from "../custom-components/numericInput";
+import { pull } from "lodash";
+import {
+  dummyData,
+  WordCount,
+  KeywordList,
+  KeywordTreemap,
+  KeywordMonths
+} from "./";
 
 interface IProps {
   rootStore?: RootStore;
@@ -32,7 +36,7 @@ export class KeywordPage extends React.Component<IProps> {
   private cutoff: number = 5;
 
   @observable
-  private dictionary: IGenericObject<number> = {};
+  private dictionary: Record<string, number> = {};
 
   @observable
   private displayTerms: WordCount[] = [];
@@ -44,9 +48,9 @@ export class KeywordPage extends React.Component<IProps> {
 
     try {
       // await this.props.rootStore.fetchKeywords();
-      // this.data = this.props.rootStore.keywordsData; 
+      // this.data = this.props.rootStore.keywordsData;
       this.data = dummyData;
-    
+
       runInAction(() => {
         this.dictionary = this.countWords();
         this.sortAndFilterKeywords([]);
@@ -60,7 +64,7 @@ export class KeywordPage extends React.Component<IProps> {
   }
 
   private countWords = () => {
-    const localDictionary: IGenericObject<number> = {};
+    const localDictionary: Record<string, number> = {};
 
     this.data.forEach((datum: any) => {
       datum.keywords.forEach((word: string) => {
@@ -73,20 +77,20 @@ export class KeywordPage extends React.Component<IProps> {
     });
 
     return localDictionary;
-  }
+  };
 
   @action
   private toggleInBlackList = (word: string) => {
-    if(this.bannedList.includes(word)) {
+    if (this.bannedList.includes(word)) {
       pull(this.bannedList, word);
     } else {
       this.bannedList.push(word);
     }
     this.activeList = this.fullList.filter(x => this.bannedList.includes(x));
     this.sortAndFilterKeywords(this.bannedList);
-  }
-  
-  private filterAmount = (value: any) => { 
+  };
+
+  private filterAmount = (value: any) => {
     this.cutoff = value || 0;
     this.sortAndFilterKeywords(this.bannedList, value);
   };
@@ -110,14 +114,14 @@ export class KeywordPage extends React.Component<IProps> {
       <div className="keyword-page">
         <h2>Number of days recorded: {this.data.length || " loading ..."} </h2>
         {/* <KeywordDays data={this.data} dictionary={this.displayTerms}/> */}
-        <KeywordMonths data={this.data}/>
-        <KeywordTreemap data={this.displayTerms} minCount={this.cutoff}/>
-        <NumericInput value={this.cutoff} onChange={this.filterAmount}/>
-        <KeywordList 
-          list={this.displayTerms} 
+        <KeywordMonths data={this.data} />
+        <KeywordTreemap data={this.displayTerms} minCount={this.cutoff} />
+        <NumericInput value={this.cutoff} onChange={this.filterAmount} />
+        <KeywordList
+          list={this.displayTerms}
           updateList={this.toggleInBlackList}
           minCount={this.cutoff}
-          />
+        />
       </div>
     );
   }

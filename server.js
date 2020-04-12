@@ -1,19 +1,21 @@
-require('dotenv').config()
-const path = require('path');
-const express = require('express')
-var bodyParser = require('body-parser');
-var multer = require('multer');
-var upload = multer();
-const app = express()
-const port = 4000
-var log = require('loglevel');
-log.enableAll()
+import * as dotenv from 'dotenv';
+import { join } from 'path';
+import express from 'express';
+import { json, urlencoded } from 'body-parser';
+import multer from 'multer';
+import { enableAll, info, error } from 'loglevel';
+import { Datastore } from '@google-cloud/datastore';
 
-app.use(bodyParser.json()); // for parsing application/json
-app.use(bodyParser.urlencoded({ extended: true }));
+dotenv.config();
+const upload = multer();
+const app = express();
+const port = 4000;
+enableAll();
 
-const Datastore = require('@google-cloud/datastore');
-const datastore = Datastore({
+app.use(json()); // for parsing application/json
+app.use(urlencoded({ extended: true }));
+
+const datastore = new Datastore({
   projectId: process.env.APP_ID
 });
 
@@ -21,12 +23,12 @@ const datastore = Datastore({
 const kind = 'Log3';
 
 app.get('/', function(req,res) {
-  res.sendFile(path.join(__dirname,'/web-page/public/','index.html'));
+  res.sendFile(join(__dirname,'/web-page/public/','index.html'));
 })
 
 app.post('/', upload.array(), function (req, res, next) {
-  var body = req.body;
-  var data = formatData(body);
+  const body = req.body;
+  const data = formatData(body);
   saveIfDoesNotExist(data, res);
 })
 
@@ -46,8 +48,8 @@ app.get('/entries', function(req, res) {
 })
 
 app.listen(port, () => {
-  log.info(`Third Eye listening on port ${port}!`)
-  log.info(`Be sure to run 'ngrok http ${port}'`);
+  info(`Third Eye listening on port ${port}!`)
+  info(`Be sure to run 'ngrok http ${port}'`);
 })
 
 app.get('/weight', function(req,res) {
@@ -94,17 +96,17 @@ let saveIfDoesNotExist = (data, res) => {
     if (entity.length < 1 || (entity.length === 1 && entity[0] == undefined)) {
       saveToCloud(data, res);
     } else {
-      log.info("Entry already exists for date:", data.key.name);
+      info("Entry already exists for date:", data.key.name);
       res.send(false);
     }
   })
   .catch((err) => {
-    log.error("Error searching for key", data.key);
+    error("Error searching for key", data.key);
     res.send(false);
   });
 }
 
-let metricsToList = (jsonState) => {
+const metricsToList = (jsonState) => {
   var list = [];
   for (var key in jsonState) {
     if (jsonState[key]) {
@@ -115,12 +117,12 @@ let metricsToList = (jsonState) => {
   return list;
 }
 
-let reverseDate = (date) => {
+const reverseDate = (date) => {
   let parts = date.split("-");
   return parts[2] + "-" + parts[1] + "-" + parts[0];
 }
 
-let formatData = (state) => {
+const formatData = (state) => {
   const data = {
     key: datastore.key([kind, reverseDate(state.dateState.date)]),
     data: {
@@ -134,14 +136,14 @@ let formatData = (state) => {
   return data;
 }
 
-let saveToCloud = (data, res) => {
+const saveToCloud = (data, res) => {
   datastore.save(data)
   .then(() => {
-    log.info("Saved data with key: ", data.key);
+    info("Saved data with key: ", data.key);
     res.send(true);
   })
   .catch((err) => {
-    log.error("Error while saving to google cloud:", err);
+    error("Error while saving to google cloud:", err);
     res.send(false);
   })
 }

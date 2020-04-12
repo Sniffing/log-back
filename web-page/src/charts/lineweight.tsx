@@ -20,8 +20,6 @@ import { Utils } from "../App.utils";
 import regression, { Result } from "regression";
 import { SliderValue } from "antd/lib/slider";
 
-const { RangePicker } = DatePicker;
-
 interface IProps {
   rootStore?: RootStore;
 }

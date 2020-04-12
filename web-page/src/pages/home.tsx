@@ -1,11 +1,10 @@
 import React from "react";
 import { Card, Row, Col } from "antd";
 import { Link } from "react-router-dom";
-import Constants from "../App.constants";
-import { Utils } from "../App.utils";
+import { Constants, IPageConfig } from "../App.constants";
 
-class Home extends React.Component {
-  private pages: any;
+export class Home extends React.Component {
+  private pages: IPageConfig[];
   private count: number;
 
   private rows: number = 2;
@@ -13,34 +12,35 @@ class Home extends React.Component {
 
   constructor(props: any) {
     super(props);
-    this.pages = Constants.pages;
+    this.pages = Constants.pageConfigs;
     this.count = this.pages.length;
   }
 
   private cards = () => {
-    const r = Array.from(new Array(this.rows), (x,i) => i+1);
-    const c = Array.from(new Array(this.cols), (x,i) => i+1);
-    
-    let v =  r.map((x,i) => (
+    const r = Array.from(new Array(this.rows), (x, i) => i + 1);
+    const c = Array.from(new Array(this.cols), (x, i) => i + 1);
+
+    let v = r.map((x, i) => (
       <Row gutter={[16, 16]}>
-        {c.map((x,j) => 
-          this.rowCards(this.pages[i*this.cols + j], 24/this.cols)
+        {c.map((x, j) =>
+          this.rowCards(this.pages[i * this.cols + j], 24 / this.cols)
         )}
       </Row>
-    ))    
-    console.log(v)
+    ));
     return v;
   };
 
-  private rowCards = (route: string,  span: number) => {
-    console.log(route);
-    return (<Col span={span} key={route}>
-      <Link to={`/${route}`}>
-        <Card>
-          <h1>{`${Utils.capitaliseFirst(route)}`}</h1>
-        </Card>
-      </Link>
-    </Col>)
+  private rowCards = (page: IPageConfig, span: number) => {
+    console.log(page);
+    return (
+      <Col span={span} key={page.page}>
+        <Link to={page.path}>
+          <Card>
+            <h1 style={{ textTransform: "capitalize" }}>{page.page}</h1>
+          </Card>
+        </Link>
+      </Col>
+    );
   };
 
   public render() {
@@ -51,5 +51,3 @@ class Home extends React.Component {
     );
   }
 }
-
-export default Home;
