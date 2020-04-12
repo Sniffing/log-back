@@ -42,14 +42,13 @@ export const convertFormValuesToLogEntry = (
 
   return {
     dateState: {
-      date: values.DATE.format(dateFormat)
+      date: values.DATE.format("MM-DD-YYYY") //why do i need this
     },
     // booleanMetricState,
-    ...(values.WEIGHT && {
-      entryMetricState: {
-        weight: values.WEIGHT
-      }
-    }),
+     
+    entryMetricState: {
+      ...(values.WEIGHT && { weight: values.WEIGHT })
+    },
     keywordsState: {
       keywords: values.FREE_EMOTIONS || []
     },
