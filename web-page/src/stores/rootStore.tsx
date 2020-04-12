@@ -103,6 +103,7 @@ export class RootStore {
       );
 
       return (await result.json()) as ILastDates;
+      // return Promise.resolve({ first: "2018-07-15", last: "2019-11-02" });
     } catch (error) {
       throw new Error(error);
     } finally {
@@ -121,26 +122,24 @@ export class RootStore {
   }
 
   public saveEntry = async (data: ILogEntry) => {
-    console.log("data", data);
-    return;
-
+    // console.log("data", data);
+    // return;
     // this.setSavingData(true);
-
     // try {
-    //     await fetch(Constants.DATABASE_URL, {
-    //         method: 'POST',
-    //         headers: {
-    //             Accept: 'application/json',
-    //             'Content-Type': 'application/json',
-    //         },
-    //         body: JSON.stringify(data),
-    //         });
-    //
+    //   await fetch(Constants.DATABASE_URL, {
+    //     method: "POST",
+    //     headers: {
+    //       Accept: "application/json",
+    //       "Content-Type": "application/json"
+    //     },
+    //     body: JSON.stringify(data)
+    //   });
     // } catch (error) {
-    //     throw new Error(error);
+    //   throw new Error(error);
     // } finally {
-    //     this.setSavingData(false);
+    //   this.setSavingData(false);
     // }
+    console.log(data.dateState);
   };
 }
 
