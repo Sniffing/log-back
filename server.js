@@ -32,18 +32,21 @@ app.post('/', upload.array(), function (req, res, next) {
   saveIfDoesNotExist(data, res);
 })
 
-app.get('/entries', function(req, res) {
-  const query = datastore.createQuery(kind)
-                         .order('date');
+app.get('/entries', async function(req, res) {
+  const firstQuery = datastore.createQuery(kind)
+                         .order('date')
+                         .limit(1);
 
-  query.run((err, entities) => {
-    const first = entities[0];
-    const last = entities[entities.length - 1];
+  const lastQuery = datastore.createQuery(kind)
+                        .order('date', {descending: true})
+                        .limit(1);  
 
-    res.send({
-      first: first.date,
-      last: last.date
-    });
+  const first = await firstQuery.run();
+  const last = await lastQuery.run();
+  
+  res.send({
+    first: first[0][0].date,
+    last: last[0][0].date
   });
 })
 
