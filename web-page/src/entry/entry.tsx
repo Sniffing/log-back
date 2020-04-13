@@ -46,10 +46,10 @@ export class EntryPage extends React.Component<IProps> {
   private formRef: React.RefObject<FormInstance> = React.createRef();
 
   @observable
-  private logEntry?: ILogEntry;
+  private dates?: ILastDates;
 
   @observable
-  private dates?: ILastDates;
+  private nextDate: Moment = moment();
 
   @observable
   private selectedBooleanMetrics: string[] = [];
@@ -66,40 +66,27 @@ export class EntryPage extends React.Component<IProps> {
       const dates = await this.props.rootStore.fetchLastDates();
       this.dates = dates;
 
-      const last = moment(dates.last)
-        .utc()
-        .add(-moment().utcOffset(), "m")
-        .add(1, "day");
+      this.setNextDate(
+        moment(dates.last)
+          .utc()
+          .add(-moment().utcOffset(), "m")
+          .add(1, "day")
+      );
 
-      this.setLogEntry(this.makeEntry(last));
       this.setFormValues();
     }
   }
 
   @action
-  private setLogEntry = (entry: ILogEntry) => {
-    this.logEntry = entry;
-  };
-
-  private makeEntry = (date: Moment = moment.utc()) => {
-    return {
-      dateState: {
-        date: date.format(dateFormat)
-      },
-      entryMetricState: {},
-      booleanMetricState: {},
-      keywordsState: {
-        keywords: []
-      },
-      textState: {
-        data: ""
-      }
-    };
+  private setNextDate = (date: Moment) => {
+    this.nextDate = date;
   };
 
   @action
   private setFormValues = () => {
-    const formValues = convertLogEntryToFormValues(this.logEntry);
+    // const formValues = convertLogEntryToFormValues(this.logEntry);
+    const formValues = defaultFormValues;
+    formValues.DATE = this.nextDate;
     this.formRef.current?.setFieldsValue(formValues);
   };
 
@@ -114,16 +101,12 @@ export class EntryPage extends React.Component<IProps> {
     }
 
     try {
-      console.log("saving", entry);
       await rootStore.saveEntry(entry);
       message.success(`Saved data for ${entry.dateState?.date}`);
       this.formRef.current?.resetFields();
 
-      const currUtc = moment(entry.dateState.date)
-        .utc()
-        .add(-moment().utcOffset(), "m");
-
-      this.setLogEntry(this.makeEntry(currUtc.add(1, "day")));
+      this.setNextDate(this.nextDate.add(1, "day"));
+      console.log("next", this.nextDate);
       this.setFormValues();
     } catch (error) {
       message.error(`Error saving data for ${entry.dateState?.date}`);

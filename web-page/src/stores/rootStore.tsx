@@ -122,21 +122,21 @@ export class RootStore {
   }
 
   public saveEntry = async (data: ILogEntry) => {
-    this.setSavingData(true);
-    try {
-      await fetch(Constants.DATABASE_URL, {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-      });
-    } catch (error) {
-      throw new Error(error);
-    } finally {
-      this.setSavingData(false);
-    }
+    // this.setSavingData(true);
+    // try {
+    //   await fetch(Constants.DATABASE_URL, {
+    //     method: "POST",
+    //     headers: {
+    //       Accept: "application/json",
+    //       "Content-Type": "application/json"
+    //     },
+    //     body: JSON.stringify(data)
+    //   });
+    // } catch (error) {
+    //   throw new Error(error);
+    // } finally {
+    //   this.setSavingData(false);
+    // }
     console.log(data);
   };
 }

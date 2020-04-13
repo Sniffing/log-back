@@ -16,7 +16,7 @@ export const convertLogEntryToFormValues = (logEntry?: ILogEntry): IEntryFormVal
   const weight = logEntry.entryMetricState?.weight;
 
   return {
-    [EntryFormFieldsEnum.DATE]: moment(logEntry.dateState.date),
+    [EntryFormFieldsEnum.DATE]: moment.utc(logEntry.dateState.date),
     [EntryFormFieldsEnum.SET_EMOTIONS]: logEntry.booleanMetricState
       ? Object.keys(logEntry.booleanMetricState)
       : [],
@@ -42,7 +42,7 @@ export const convertFormValuesToLogEntry = (
 
   return {
     dateState: {
-      date: values.DATE.format("MM-DD-YYYY") //why do i need this
+      date: values.DATE.format(dateFormat)
     },
     // booleanMetricState,
      
