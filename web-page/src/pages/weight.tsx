@@ -8,7 +8,7 @@ interface IProps {
   rootStore?: RootStore;
 }
 
-@inject("rootstore")
+@inject("rootStore")
 export class WeightPage extends React.Component<IProps> {
   render() {
     return (
