@@ -23,6 +23,7 @@ class NumericInput extends Component<IProps> {
       <Tooltip
         trigger={"focus"}
         placement="topLeft"
+        overlay={null}
         overlayClassName="numeric-input"
       >
         <Input

@@ -1,21 +1,15 @@
-import React, { Component } from 'react';
-import { Route, RouteComponentProps } from 'react-router-dom';
-import { withRouter } from 'react-router';
-import { Provider, observer } from 'mobx-react';
-import { observable, action } from 'mobx';
-import { Menu, Icon } from 'antd';
-import './App.css';
-import Home from './pages/home';
-import CalendarPage from './pages/calendar';
-import WeightPage from './pages/weight';
-import KeywordPage from './pages/keyword';
-import MemoryPage from './pages/memory';
+import React, { Component } from "react";
+import { Route, RouteComponentProps, withRouter } from "react-router-dom";
+import { Provider, observer } from "mobx-react";
+import { observable, action } from "mobx";
+import { Menu } from "antd";
+import "./App.css";
 
-import rootStore from './stores/rootStore';
-import { ClickParam } from 'antd/lib/menu';
-
-const pages = ['weight', 'keywords', 'calendar', 'memory'];
-
+import rootStore from "./stores/rootStore";
+import { ClickParam } from "antd/lib/menu";
+import { Home } from "./pages";
+import { IPageConfig, Constants } from "./App.constants";
+import { HomeOutlined, DownCircleOutlined } from "@ant-design/icons";
 
 @observer
 class App extends Component<RouteComponentProps> {
@@ -25,43 +19,55 @@ class App extends Component<RouteComponentProps> {
   @action
   private handleClick = (param: ClickParam) => {
     this.current = param.key;
-    this.props.history.push(`/${pages.includes(this.current) ? this.current : '' }`);
-  }
+    this.props.history.push(
+      `/${
+        Constants.pageConfigs
+          .map((config: IPageConfig) => config.page.toLowerCase())
+          .includes(this.current)
+          ? this.current
+          : ""
+      }`
+    );
+  };
 
   public render() {
-    const routeOptions = pages.map(page =>
-      <Menu.Item key={page}>{page}</Menu.Item>
-    );
+    const routeOptions = Constants.pageConfigs.map(page => (
+      <Menu.Item key={page.page}>{page.page.toLowerCase()}</Menu.Item>
+    ));
 
     return (
-    
-    <Provider
-      rootStore={rootStore}
-      >
-      <div className="App">
-        <Menu onClick={this.handleClick} selectedKeys={[this.current]} mode="horizontal">
+      <Provider rootStore={rootStore}>
+        <div className="App rain">
+          <Menu
+            onClick={this.handleClick}
+            selectedKeys={[this.current]}
+            mode="horizontal"
+          >
             <Menu.Item key="home">
-              <Icon type="home" />
+              <HomeOutlined />
             </Menu.Item>
             <Menu.SubMenu
               title={
                 <span className="submenu-title-wrapper">
-                  <Icon type="down-circle" />
+                  <DownCircleOutlined />
                   {this.current}
                 </span>
               }
             >
               {routeOptions}
             </Menu.SubMenu>
-        </Menu>
-        <body className="App-body">
-          <Route exact path='/' component={ Home } />
-          <Route path='/weight' component={ WeightPage } />
-          <Route path='/keywords' component={ KeywordPage } />
-          <Route path='/calendar' component={ CalendarPage } />
-          <Route path='/memory' component={ MemoryPage } />
-        </body>
-      </div>
+          </Menu>
+          <div className="App-body">
+            <Route exact path="/" component={Home} />
+            {Constants.pageConfigs.map((page: IPageConfig) => (
+              <Route
+                key={page.page}
+                path={page.path}
+                component={page.component}
+              />
+            ))}
+          </div>
+        </div>
       </Provider>
     );
   }
