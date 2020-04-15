@@ -5,9 +5,13 @@
   "main": "server.js",
   "dependencies": {
     "@google-cloud/datastore": "^5.1.0",
+    "@types/dotenv": "^8.2.0",
+    "@types/jest": "^25.2.1",
+    "@typescript-eslint/eslint-plugin": "^2.28.0",
+    "@typescript-eslint/parser": "^2.28.0",
     "axios": "^0.19.0",
     "body-parser": "^1.19.0",
-    "dotenv": "^6.2.0",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "loglevel": "^1.6.3",
     "multer": "^1.4.2",
@@ -18,13 +22,19 @@
     "@babel/core": "^7.9.0",
     "@babel/node": "^7.8.7",
     "@babel/preset-env": "^7.9.5",
+    "@babel/preset-typescript": "^7.9.0",
     "@types/express": "^4.17.6",
+    "@types/multer": "^1.4.2",
+    "babel-jest": "^25.3.0",
     "eslint": "^6.8.0",
+    "jest": "^25.3.0",
     "typescript": "^3.8.3"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsc && nodemon --exec babel-node dist/server.js"
+    "test": "jest server/*",
+    "test:watch": "jest server/* --watch",
+    "start": "tsc && nodemon --exec babel-node dist/server.js",
+    "build": "rm -rf dist && tsc"
   },
   "repository": {
     "type": "git",
@@ -40,5 +50,11 @@
     "verbose": true,
     "ignore": [],
     "delay": "1000"
+  },
+  "eslintConfig": {
+    "env": {
+      "browser": true,
+      "node": true
+    }
   }
 }
