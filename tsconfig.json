@@ -2,16 +2,18 @@
   "compilerOptions": {
     "module": "commonjs",
     "esModuleInterop": true,
+    "noImplicitAny": true,
     "target": "es6",
     "moduleResolution": "node",
     "sourceMap": true,
     "outDir": "dist"
   },
   "include": [
-    "*.ts"
+    "server/*.ts"
   ],
   "exclude": [
-    "web-page/*"
+    "web-page/*",
+    "server/*.spec.ts",
   ],
   "lib": ["es2015"],
 }
