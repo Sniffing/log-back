@@ -7,7 +7,7 @@ export class Home extends React.Component {
   private pages: IPageConfig[];
   private count: number;
 
-  private rows: number = 2;
+  private rows: number = 3;
   private cols: number = 2;
 
   constructor(props: any) {
@@ -31,12 +31,16 @@ export class Home extends React.Component {
   };
 
   private rowCards = (page: IPageConfig, span: number) => {
-    console.log(page);
+    if (!page) {
+      return <></>;
+    }
     return (
       <Col span={span} key={page.page}>
         <Link to={page.path}>
           <Card>
-            <h1 style={{ textTransform: "capitalize" }}>{page.page}</h1>
+            <h1 style={{ textTransform: "capitalize" }}>
+              {page.page.toLowerCase()}
+            </h1>
           </Card>
         </Link>
       </Col>
