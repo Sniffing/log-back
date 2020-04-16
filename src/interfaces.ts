@@ -32,7 +32,7 @@ export function isTypeILogEntryDTO(obj: any): obj is ILogEntryDTO {
 
 export interface ILogEntryData {
   date: string,
-  weight: string,
+  weight?: string,
   keywords: string[],
   text: string,
 }

@@ -6,14 +6,20 @@
     "target": "es6",
     "moduleResolution": "node",
     "sourceMap": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "noEmitOnError": true,
+    "watch": true,
+    "strict": true,
+    "strictNullChecks": false,
   },
   "include": [
-    "server/*.ts"
+    "src/*.ts"
   ],
+  "rootDir": "src",
   "exclude": [
     "web-page/*",
-    "server/*.spec.ts",
+    "src/*.spec.ts",
+    "node_modules"
   ],
   "lib": ["es2015"],
 }

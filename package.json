@@ -33,7 +33,8 @@
     "test": "jest server/*",
     "test:watch": "jest server/* --watch",
     "start": "tsc && nodemon --exec babel-node dist/server.js",
-    "build": "rm -rf dist && tsc"
+    "build": "rm -rf dist && tsc",
+    "debug": "tsc && nodemon --inspect dist/server.js"
   },
   "repository": {
     "type": "git",
