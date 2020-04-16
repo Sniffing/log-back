@@ -3,22 +3,20 @@ import { join } from 'path';
 import express from 'express';
 import { Request, Response } from 'express';
 import { json, urlencoded } from 'body-parser';
-import { enableAll, info, error } from 'loglevel';
 import { Datastore } from '@google-cloud/datastore';
 import { GOOGLE_KIND_KEY, ERROR_RESPONSES, logEntryDataToKeywordDTO, logEntryDataToWeightDTO, logEntryDataToTextDTO, typeCheckEntriesAndFilterInvalid, reverseDate, mergeWordMetrics } from './constants'
-import { ILogEntry, IWeightDTO, IKeywordDTO, ITextDTO, ILogEntryDTO, BooleanMetric, ILogEntryData, isTypeILogEntryData, IKeyword, IBooleanMetrics } from './interfaces';
+import { ILogEntry, IWeightDTO, IKeywordDTO, ITextDTO, ILogEntryDTO, ILogEntryData, isTypeILogEntryData } from './interfaces';
 import { RunQueryResponse } from '@google-cloud/datastore/build/src/query';
 
 dotenv.config();
 const app = express();
 const port = 4000;
-enableAll();
 
 app.use(json()); // for parsing application/json
 app.use(urlencoded({ extended: true }));
 app.listen(port, () => {
-  info(`Third Eye listening on port ${port}!`)
-  info(`Be sure to run 'ngrok http ${port}'`);
+  console.info(`Third Eye listening on port ${port}!`)
+  console.info(`Be sure to run 'ngrok http ${port}'`);
 });
 
 const datastore = new Datastore({
@@ -44,56 +42,76 @@ app.get('/entries', async (err: Error, req: Request, res: Response) => {
                         .order('date', {descending: true})
                         .limit(1);  
 
-  const first: RunQueryResponse = await firstQuery.run();
-  const last: RunQueryResponse = await lastQuery.run();
+  try {
+    const first: RunQueryResponse = await firstQuery.run();
+    const last: RunQueryResponse = await lastQuery.run();
 
-  if (!isTypeILogEntryData(first) || !isTypeILogEntryData(last)) {
-    console.error('Retrieved data did not fit type ILogData', err.stack);
-    res.status(500).send(ERROR_RESPONSES.STORE_DATA_DOES_NOT_MATCH_TYPES);
-  }
+    if (!isTypeILogEntryData(first) || !isTypeILogEntryData(last)) {
+      console.error('Retrieved data did not fit type ILogData', err.stack);
+      res.status(500).send(ERROR_RESPONSES.STORE_DATA_DOES_NOT_MATCH_TYPES);
+    }
 
-  const firstAndLastEntries = {
-    first: first[0][0].date,
-    last: last[0][0].date
-  };
+    const firstAndLastEntries = {
+      first: first[0][0].date,
+      last: last[0][0].date
+    };
 
-  console.log('Found first and last entries', firstAndLastEntries);
-  res.send(firstAndLastEntries);
+    console.log('Found first and last entries', firstAndLastEntries);
+    res.send(firstAndLastEntries);
+  } catch (error) {
+    console.error(ERROR_RESPONSES.COULD_NOT_FETCH_DATA);
+    res.status(500).send(ERROR_RESPONSES.COULD_NOT_FETCH_DATA);
+  }  
 })
 
 app.get('/weight', async (req: Request, res: Response) => {
   const query = datastore.createQuery(GOOGLE_KIND_KEY)
                          .filter('weight', ">", "0");
 
-  const entries: RunQueryResponse = await query.run();
+  try {
+    const entries: RunQueryResponse = await query.run();
   
-  const result: IWeightDTO[] = typeCheckEntriesAndFilterInvalid(entries[0])
-    .map(logEntryDataToWeightDTO);
+    const result: IWeightDTO[] = typeCheckEntriesAndFilterInvalid(entries[0])
+      .map(logEntryDataToWeightDTO);
 
-  console.log(`Returning ${result.length} out of ${entries[0].length} weight entries`);
-  res.send(result);
+    console.log(`Returning ${result.length} out of ${entries[0].length} weight entries`);
+    res.send(result);
+  } catch (error) {
+    console.error(ERROR_RESPONSES.COULD_NOT_FETCH_DATA);
+    res.status(500).send(ERROR_RESPONSES.COULD_NOT_FETCH_DATA);
+  }  
 });
 
 app.get('/keywords', async (req: Request, res: Response) => {
   const query = datastore.createQuery(GOOGLE_KIND_KEY);
-  const entries: RunQueryResponse = await query.run()
-  
-  let result: IKeywordDTO[] = typeCheckEntriesAndFilterInvalid(entries[0])
-    .map(logEntryDataToKeywordDTO);
 
-  console.log(`Returning ${result.length} out of ${entries[0].length} keyword entries`)
-  res.send(result);
+  try {
+    const entries: RunQueryResponse = await query.run()
+    let result: IKeywordDTO[] = typeCheckEntriesAndFilterInvalid(entries[0])
+      .map(logEntryDataToKeywordDTO);
+
+    console.log(`Returning ${result.length} out of ${entries[0].length} keyword entries`)
+    res.send(result);
+  } catch (error) {
+    console.error(ERROR_RESPONSES.COULD_NOT_FETCH_DATA);
+    res.status(500).send(ERROR_RESPONSES.COULD_NOT_FETCH_DATA);
+  }
 });
 
 app.get('/text', async (req: Request, res: Response) => {
   const query = datastore.createQuery(GOOGLE_KIND_KEY);
 
-  const entries: RunQueryResponse = await query.run();
-  const result: ITextDTO[] = typeCheckEntriesAndFilterInvalid(entries[0])
-    .map(logEntryDataToTextDTO);
+  try {
+    const entries: RunQueryResponse = await query.run();
+    const result: ITextDTO[] = typeCheckEntriesAndFilterInvalid(entries[0])
+      .map(logEntryDataToTextDTO);
 
-  console.log(`Returning ${result.length} out of ${entries[0].length} text entries`)
-  res.send(result);
+    console.log(`Returning ${result.length} out of ${entries[0].length} text entries`)
+    res.send(result);
+  } catch (error) {
+    console.error(ERROR_RESPONSES.COULD_NOT_FETCH_DATA);
+    res.status(500).send(ERROR_RESPONSES.COULD_NOT_FETCH_DATA);
+  }
 });
 
 const saveIfDoesNotExist = (data: ILogEntryDTO, res: Response) => {
@@ -102,12 +120,12 @@ const saveIfDoesNotExist = (data: ILogEntryDTO, res: Response) => {
     if (entity.length < 1 || (entity.length === 1 && entity[0] == undefined)) {
       saveToCloud(data, res);
     } else {
-      info("Entry already exists for date:", data.key.name);
+      console.info("Entry already exists for date:", data.key.name);
       res.send(false);
     }
   })
   .catch((err) => {
-    error("Error searching for key", data.key);
+    console.error("Error searching for key", data.key);
     res.send(false);
   });
 }
@@ -126,14 +144,13 @@ const formatData = (state: ILogEntry): ILogEntryDTO => {
   }
 }
 
-const saveToCloud = (data: ILogEntryDTO, res: Response) => {
-  datastore.save(data)
-  .then(() => {
-    info("Saved data with key: ", data.key);
-    res.send(true);
-  })
-  .catch((err) => {
-    error("Error while saving to google cloud:", err);
-    res.send(false);
-  })
+const saveToCloud = async (data: ILogEntryDTO, res: Response) => {
+  try {
+    await datastore.save(data);
+    res.status(200).send(`Saved ${data.data.date}`);
+    console.log("Saved data with key: ", data.key);
+  } catch (error) {
+    console.error("Error while saving to google cloud:", error);
+    res.status(500).send(false);
+  }
 }

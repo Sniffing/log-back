@@ -4,6 +4,7 @@ export const GOOGLE_KIND_KEY = 'Log3';
 
 export const ERROR_RESPONSES = {
   STORE_DATA_DOES_NOT_MATCH_TYPES: 'Data returned from the cloud store does not match expect type',
+  COULD_NOT_FETCH_DATA: 'Could not fetch data from cloud',
 }
 
 export const logEntryDataToWeightDTO = (entry: ILogEntryData): IWeightDTO => {
