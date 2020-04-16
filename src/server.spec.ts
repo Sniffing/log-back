@@ -3,61 +3,32 @@ import { isTypeILogEntry, ILogEntry } from './interfaces';
 describe("Test type guards", () => {
   describe("isLogEntry", () => {
 
-
     const objectMissingField: Partial<ILogEntry> = {
-      dateState: {
-        date: "test",
-      },
-      entryMetricState: {
-        weight: '5',
-      },
+      dateState: { date: "test", },
+      entryMetricState: { weight: '5', },
       textState: { data: 'test'},
     }
 
     const ILogEntryObject: ILogEntry = {
-      dateState: {
-        date: 'test',
-      },
-      entryMetricState: {
-        weight: '66'
-      },
-      keywordsState: {
-        keywords: ['a'],
-      },
-      textState: {
-        data: 'test'
-      },
+      dateState: { date: 'test', },
+      entryMetricState: { weight: '66' },
+      keywordsState: { keywords: ['a'], },
+      textState: { data: 'test' },
     }
 
     const objectPlusMore = {
       extra: 'here',
-      dateState: {
-        date: 'test',
-      },
-      entryMetricState: {
-        weight: '66'
-      },
-      keywordsState: {
-        keywords: ['a'],
-      },
-      textState: {
-        data: 'test'
-      },
+      dateState: { date: 'test', },
+      entryMetricState: { weight: '66' },
+      keywordsState: { keywords: ['a'], },
+      textState: { data: 'test' },
     }
 
     const objectAllFieldsWrongTypes = {
-      dateState: {
-        date: 66,
-      },
-      entryMetricState: {
-        weight: '66'
-      },
-      keywordsState: {
-        keywords: "hi",
-      },
-      textState: {
-        data: 'test'
-      },
+      dateState: { date: 66,},
+      entryMetricState: { weight: '66' },
+      keywordsState: { keywords: "hi", },
+      textState: { data: 'test' },
     }
 
     const invalidArguments = {

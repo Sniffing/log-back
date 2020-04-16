@@ -5,7 +5,9 @@ import { Request, Response } from 'express';
 import { json, urlencoded } from 'body-parser';
 import { enableAll, info, error } from 'loglevel';
 import { Datastore } from '@google-cloud/datastore';
-import { ILogEntry, IWeightDTO, IKeywordDTO, ITextDTO, ILogEntryDTO, BooleanMetric, ILogEntryData } from './interfaces';
+import { GOOGLE_KIND_KEY, ERROR_RESPONSES } from './constants'
+import { ILogEntry, IWeightDTO, IKeywordDTO, ITextDTO, ILogEntryDTO, BooleanMetric, ILogEntryData, isTypeILogEntryData } from './interfaces';
+import { RunQueryResponse } from '@google-cloud/datastore/build/src/query';
 
 dotenv.config();
 const app = express();
@@ -14,66 +16,70 @@ enableAll();
 
 app.use(json()); // for parsing application/json
 app.use(urlencoded({ extended: true }));
+app.listen(port, () => {
+  info(`Third Eye listening on port ${port}!`)
+  info(`Be sure to run 'ngrok http ${port}'`);
+});
 
 const datastore = new Datastore({
   projectId: process.env.APP_ID
 });
 
-// The kind for the new entity
-const kind = 'Log3';
-
-app.get('/', function(req,res) {
+app.get('/', (req: Request, res: Response) => {
   res.sendFile(join(__dirname,'/web-page/public/','index.html'));
 })
 
-app.post('/', function (req, res, next) {
+app.post('/', (req: Request, res: Response) => {
   const body = req.body;
   const data: ILogEntryDTO = formatData(body);
   saveIfDoesNotExist(data, res);
 })
 
-app.get('/entries', async function(req, res) {
-  const firstQuery = datastore.createQuery(kind)
+app.get('/entries', async (err: Error, req: Request, res: Response) => {
+  const firstQuery = datastore.createQuery(GOOGLE_KIND_KEY)
                          .order('date')
                          .limit(1);
 
-  const lastQuery = datastore.createQuery(kind)
+  const lastQuery = datastore.createQuery(GOOGLE_KIND_KEY)
                         .order('date', {descending: true})
                         .limit(1);  
 
-  const first = await firstQuery.run();
-  const last = await lastQuery.run();
-  
-  res.send({
+  const first: RunQueryResponse = await firstQuery.run();
+  const last: RunQueryResponse = await lastQuery.run();
+
+  if (!isTypeILogEntryData(first) || !isTypeILogEntryData(last)) {
+    console.error('Retrieved data did not fit type ILogData', err.stack);
+    res.status(500).send(ERROR_RESPONSES.STORE_DATA_DOES_NOT_MATCH_TYPES);
+  }
+
+  const firstAndLastEntries = {
     first: first[0][0].date,
     last: last[0][0].date
-  });
+  };
+
+  console.log('Found first and last entries', firstAndLastEntries);
+  res.send(firstAndLastEntries);
 })
 
-app.listen(port, () => {
-  info(`Third Eye listening on port ${port}!`)
-  info(`Be sure to run 'ngrok http ${port}'`);
-})
-
-app.get('/weight', (req: Request, res: Response) => {
-  const result: IWeightDTO[] = [];
-  const query = datastore.createQuery(kind)
+app.get('/weight', async (req: Request, res: Response) => {
+  const query = datastore.createQuery(GOOGLE_KIND_KEY)
                          .filter('weight', ">", "0");
-  query.run((err, entities) => {
-    for (var i = 0; i < entities.length; i++) {
-      result.push({
-        date: entities[i].date, 
-        weight: entities[i].weight
-      });
-    }
-    res.send(result);
-  });
+
+  const entries = await query.run();
+  const result: IWeightDTO[] = entries.map((entry: any) => {
+      return {
+        date: entry.date, 
+        weight: entry.weight
+      }
+    });
+
+  res.send(result);
 });
 
-app.get('/keywords', function(req,res) {
-  const query = datastore.createQuery(kind);
+app.get('/keywords', (req: Request, res: Response) => {
+  const query = datastore.createQuery(GOOGLE_KIND_KEY);
   let result: IKeywordDTO[] = [];
-  query.run((err, entities) => {
+  query.run((err, entities: any) => {
     console.log("There were %s entities retrieved", entities.length);
     for (var i = 0; i < entities.length; i++) {
       result.push({
@@ -85,10 +91,10 @@ app.get('/keywords', function(req,res) {
   });
 });
 
-app.get('/text', function(req,res) {
-  const query = datastore.createQuery(kind);
+app.get('/text', (req: Request, res: Response) => {
+  const query = datastore.createQuery(GOOGLE_KIND_KEY);
   let result: ITextDTO[] = [];
-  query.run((err, entities) => {
+  query.run((err, entities: any) => {
     console.log("There were %s entities retrieved", entities.length);
 
     for (var i = 0; i < entities.length; i++) {
@@ -132,10 +138,10 @@ const reverseDate = (date: string) => {
 
 const formatData = (state: ILogEntry): ILogEntryDTO => {
   const data: ILogEntryDTO = {
-    key: datastore.key([kind, reverseDate(state.dateState.date)]),
+    key: datastore.key([GOOGLE_KIND_KEY, reverseDate(state.dateState.date)]),
     data: {
       date: reverseDate(state.dateState.date),
-      weight: state.entryMetricState.weight,
+      weight: state.entryMetricState?.weight,
       keywords: state.keywordsState.keywords.map(k => k.toLowerCase()).concat(metricsToList(state.booleanMetricState)),
       text: state.textState.data,
     }

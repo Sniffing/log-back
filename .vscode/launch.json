@@ -1,0 +1,15 @@
+{
+  "configurations": [
+    {
+        "type": "node",
+        "request": "launch",
+        "name": "Launch Program",
+        "program": "${workspaceFolder}/src/server.ts",
+        "sourceMaps": true,
+        "trace": "all",
+        "outFiles": [
+            "${workspaceFolder}/dist/**/*.js"
+        ]
+    }
+]
+}
