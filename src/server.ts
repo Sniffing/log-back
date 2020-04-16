@@ -5,8 +5,8 @@ import { Request, Response } from 'express';
 import { json, urlencoded } from 'body-parser';
 import { enableAll, info, error } from 'loglevel';
 import { Datastore } from '@google-cloud/datastore';
-import { GOOGLE_KIND_KEY, ERROR_RESPONSES } from './constants'
-import { ILogEntry, IWeightDTO, IKeywordDTO, ITextDTO, ILogEntryDTO, BooleanMetric, ILogEntryData, isTypeILogEntryData } from './interfaces';
+import { GOOGLE_KIND_KEY, ERROR_RESPONSES, logEntryDataToKeywordDTO, logEntryDataToWeightDTO, logEntryDataToTextDTO, typeCheckEntriesAndFilterInvalid, reverseDate, mergeWordMetrics } from './constants'
+import { ILogEntry, IWeightDTO, IKeywordDTO, ITextDTO, ILogEntryDTO, BooleanMetric, ILogEntryData, isTypeILogEntryData, IKeyword, IBooleanMetrics } from './interfaces';
 import { RunQueryResponse } from '@google-cloud/datastore/build/src/query';
 
 dotenv.config();
@@ -65,46 +65,38 @@ app.get('/weight', async (req: Request, res: Response) => {
   const query = datastore.createQuery(GOOGLE_KIND_KEY)
                          .filter('weight', ">", "0");
 
-  const entries = await query.run();
-  const result: IWeightDTO[] = entries.map((entry: any) => {
-      return {
-        date: entry.date, 
-        weight: entry.weight
-      }
-    });
+  const entries: RunQueryResponse = await query.run();
+  
+  const result: IWeightDTO[] = typeCheckEntriesAndFilterInvalid(entries[0])
+    .map(logEntryDataToWeightDTO);
 
+  console.log(`Returning ${result.length} out of ${entries[0].length} weight entries`);
   res.send(result);
 });
 
-app.get('/keywords', (req: Request, res: Response) => {
+app.get('/keywords', async (req: Request, res: Response) => {
   const query = datastore.createQuery(GOOGLE_KIND_KEY);
-  let result: IKeywordDTO[] = [];
-  query.run((err, entities: any) => {
-    console.log("There were %s entities retrieved", entities.length);
-    for (var i = 0; i < entities.length; i++) {
-      result.push({
-        date: entities[i].date, 
-        keywords: entities[i].keywords
-      });
-    }
-    res.send(result);
-  });
+  const entries: RunQueryResponse = await query.run()
+  
+  let result: IKeywordDTO[] = typeCheckEntriesAndFilterInvalid(entries[0])
+    .map(logEntryDataToKeywordDTO);
+
+  console.log(`Returning ${result.length} out of ${entries[0].length} keyword entries`)
+  res.send(result);
 });
 
-app.get('/text', (req: Request, res: Response) => {
+app.get('/text', async (req: Request, res: Response) => {
   const query = datastore.createQuery(GOOGLE_KIND_KEY);
-  let result: ITextDTO[] = [];
-  query.run((err, entities: any) => {
-    console.log("There were %s entities retrieved", entities.length);
 
-    for (var i = 0; i < entities.length; i++) {
-      result.push({"date": entities[i].date, "text": entities[i].text})
-    }
-    res.send(result);
-  });
+  const entries: RunQueryResponse = await query.run();
+  const result: ITextDTO[] = typeCheckEntriesAndFilterInvalid(entries[0])
+    .map(logEntryDataToTextDTO);
+
+  console.log(`Returning ${result.length} out of ${entries[0].length} text entries`)
+  res.send(result);
 });
 
-let saveIfDoesNotExist = (data: ILogEntryDTO, res: Response) => {
+const saveIfDoesNotExist = (data: ILogEntryDTO, res: Response) => {
   datastore.get(data.key)
   .then((entity) => {
     if (entity.length < 1 || (entity.length === 1 && entity[0] == undefined)) {
@@ -120,34 +112,18 @@ let saveIfDoesNotExist = (data: ILogEntryDTO, res: Response) => {
   });
 }
 
-const metricsToList = (jsonState: Partial<Record<BooleanMetric, boolean>>) => {
-  var list = [];
-  for (var key in jsonState) {
-    if (jsonState[key as BooleanMetric]) {
-      list.push(key.toLowerCase());
-    }
-  }
-
-  return list;
-}
-
-const reverseDate = (date: string) => {
-  let parts = date.split("-");
-  return parts[2] + "-" + parts[1] + "-" + parts[0];
-}
-
 const formatData = (state: ILogEntry): ILogEntryDTO => {
-  const data: ILogEntryDTO = {
-    key: datastore.key([GOOGLE_KIND_KEY, reverseDate(state.dateState.date)]),
+  const date = reverseDate(state.dateState.date);
+
+  return {
+    key: datastore.key([GOOGLE_KIND_KEY, date]),
     data: {
-      date: reverseDate(state.dateState.date),
+      date,
       weight: state.entryMetricState?.weight,
-      keywords: state.keywordsState.keywords.map(k => k.toLowerCase()).concat(metricsToList(state.booleanMetricState)),
+      keywords: mergeWordMetrics(state.keywordsState, state.booleanMetricState),
       text: state.textState.data,
     }
   }
-
-  return data;
 }
 
 const saveToCloud = (data: ILogEntryDTO, res: Response) => {

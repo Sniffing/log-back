@@ -60,7 +60,7 @@ interface IEntryDTO {
 }
 
 export interface IWeightDTO extends IEntryDTO {
-  weight: number,
+  weight: string,
 }
 
 export interface IKeywordDTO extends IEntryDTO {
@@ -71,7 +71,7 @@ export interface ITextDTO  extends IEntryDTO {
   text: string,
 }
 
-interface IDate {
+export interface IDate {
   date: string;
 }
 export function isTypeIDate(obj: any): obj is IDate {
@@ -80,7 +80,7 @@ export function isTypeIDate(obj: any): obj is IDate {
   return !!o.date;
 }
 
-interface IKeyword {
+export interface IKeyword {
   keywords: string[];
 }
 export function isTypeIKeyword(obj: any): obj is IKeyword {
@@ -89,7 +89,7 @@ export function isTypeIKeyword(obj: any): obj is IKeyword {
   return o.keywords && Array.isArray(o.keywords);
 }
 
-interface IText {
+export interface IText {
   data: string;
 }
 export function isTypeIText(obj: any): obj is IText {
@@ -98,8 +98,8 @@ export function isTypeIText(obj: any): obj is IText {
   return !!o.data;
 }
 
-type IBooleanMetrics = Partial<Record<BooleanMetric, boolean>>;
+export type IBooleanMetrics = Partial<Record<BooleanMetric, boolean>>;
 
-interface IEntryMetric {
+export interface IEntryMetric {
   weight?: string;
 }
