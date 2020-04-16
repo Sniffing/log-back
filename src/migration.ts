@@ -1,8 +1,6 @@
-require('dotenv').config()
-
-var bodyParser = require('body-parser');
-var multer = require('multer');
-var upload = multer();
+import * as dotenve from 'dotenv';
+import bodyParser from 'body-parser';
+import { ILogEntryData, ILogEntryDTO } from './interfaces';
 
 const Datastore = require('@google-cloud/datastore');
 const datastore = Datastore({
@@ -10,10 +8,10 @@ const datastore = Datastore({
 });
 
 class GoogleCloudData {
-  key;
+  key: any;
   data: EntryData;
 
-  constructor (key, data: EntryData) {
+  constructor (key: any, data: EntryData) {
     this.key = key;
     this.data = data;
   }
@@ -36,8 +34,8 @@ class EntryData {
 const query = datastore.createQuery('Log');
 
 function migrateTo(newKindName: string){
-  datastore.runQuery(query, (err, entities) => {
-    entities.forEach(entity => {
+  datastore.runQuery(query, (_: any, entities: any[]) => {
+    entities.forEach((entity: any) => {
       let newKey = entity[datastore.KEY];
       newKey.kind = newKindName;
       entity[datastore.KEY] = newKey;
@@ -48,14 +46,14 @@ function migrateTo(newKindName: string){
 
 function saveIfDoesNotExist(data: GoogleCloudData){
   datastore.get(data.key)
-  .then((entity) => {
-    if (entity.length < 1 || (entity.length === 1 && entity[0] == undefined)) {
+  .then((entity: ILogEntryDTO[]) => {
+    if (entity.length < 1 || (entity.length === 1 && entity[0] === undefined)) {
       saveToCloud(data);
     } else {
       console.log("Entry already exists for date:", data.key.name);
     }
   })
-  .catch((err) => {
+  .catch(() => {
     console.log("Error searching for key", data.key);
   });
 }
@@ -65,12 +63,12 @@ function saveToCloud(data: GoogleCloudData) {
   .then(() => {
     console.log("Saved data with key: ", data.key);
   })
-  .catch((err) => {
+  .catch((err: any) => {
     console.log("Error while saving to google cloud:", err);
   })
 }
 
-function prepare(entity) {
+function prepare(entity: any) {
   let key = datastore.key([entity[datastore.KEY].kind, entity.date]);
   let data = new EntryData(entity.date, entity.weight, entity.keywords, entity.text);
 

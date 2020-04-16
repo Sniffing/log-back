@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "noImplicitAny": true,
+    "target": "es6",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "outDir": "dist",
+    "noEmitOnError": true,
+    // "watch": true,
+    "strict": true,
+    "strictNullChecks": false,
+  },
+  "include": [
+    "src/*.ts"
+  ],
+  "rootDir": "src",
+  "exclude": [
+    "web-page/*",
+    "src/*.spec.ts",
+    "node_modules"
+  ],
+  "lib": ["es2015"],
+}
