@@ -8,7 +8,7 @@
     "sourceMap": true,
     "outDir": "dist",
     "noEmitOnError": true,
-    "watch": true,
+    // "watch": true,
     "strict": true,
     "strictNullChecks": false,
   },
