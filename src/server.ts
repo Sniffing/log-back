@@ -33,7 +33,7 @@ app.post('/', (req: Request, res: Response) => {
   saveIfDoesNotExist(data, res);
 })
 
-app.get('/entries', async (err: Error, req: Request, res: Response) => {
+app.get('/entries', async (req: Request, res: Response) => {
   const firstQuery = datastore.createQuery(GOOGLE_KIND_KEY)
                          .order('date')
                          .limit(1);
@@ -46,11 +46,6 @@ app.get('/entries', async (err: Error, req: Request, res: Response) => {
     const first: RunQueryResponse = await firstQuery.run();
     const last: RunQueryResponse = await lastQuery.run();
 
-    if (!isTypeILogEntryData(first) || !isTypeILogEntryData(last)) {
-      console.error('Retrieved data did not fit type ILogData', err.stack);
-      res.status(500).send(ERROR_RESPONSES.STORE_DATA_DOES_NOT_MATCH_TYPES);
-    }
-
     const firstAndLastEntries = {
       first: first[0][0].date,
       last: last[0][0].date
@@ -59,7 +54,7 @@ app.get('/entries', async (err: Error, req: Request, res: Response) => {
     console.log('Found first and last entries', firstAndLastEntries);
     res.send(firstAndLastEntries);
   } catch (error) {
-    console.error(ERROR_RESPONSES.COULD_NOT_FETCH_DATA);
+    console.error('Could not fetch date entries', error);
     res.status(500).send(ERROR_RESPONSES.COULD_NOT_FETCH_DATA);
   }  
 })
@@ -77,7 +72,7 @@ app.get('/weight', async (req: Request, res: Response) => {
     console.log(`Returning ${result.length} out of ${entries[0].length} weight entries`);
     res.send(result);
   } catch (error) {
-    console.error(ERROR_RESPONSES.COULD_NOT_FETCH_DATA);
+    console.error('Could not fetch weight entries', error);
     res.status(500).send(ERROR_RESPONSES.COULD_NOT_FETCH_DATA);
   }  
 });
@@ -93,7 +88,7 @@ app.get('/keywords', async (req: Request, res: Response) => {
     console.log(`Returning ${result.length} out of ${entries[0].length} keyword entries`)
     res.send(result);
   } catch (error) {
-    console.error(ERROR_RESPONSES.COULD_NOT_FETCH_DATA);
+    console.error('Could not fetch keywords', error);
     res.status(500).send(ERROR_RESPONSES.COULD_NOT_FETCH_DATA);
   }
 });
@@ -114,20 +109,20 @@ app.get('/text', async (req: Request, res: Response) => {
   }
 });
 
-const saveIfDoesNotExist = (data: ILogEntryDTO, res: Response) => {
-  datastore.get(data.key)
-  .then((entity) => {
-    if (entity.length < 1 || (entity.length === 1 && entity[0] == undefined)) {
-      saveToCloud(data, res);
-    } else {
-      console.info("Entry already exists for date:", data.key.name);
-      res.send(false);
-    }
-  })
-  .catch((err) => {
+const saveIfDoesNotExist = async (data: ILogEntryDTO, res: Response) => {
+  try {
+    const entry = await datastore.get(data.key);
+    console.log(entry);
+  //   if (entry.length < 1 || (entry.length === 1 && entry[0] == undefined)) {
+  //     saveToCloud(data, res);
+  //   } else {
+  //     console.info("Entry already exists for date:", data.key.name);
+  //     res.send(false);
+  //   }
+  } catch (error) {
     console.error("Error searching for key", data.key);
     res.send(false);
-  });
+  }
 }
 
 const formatData = (state: ILogEntry): ILogEntryDTO => {
