@@ -5,6 +5,9 @@ export const GOOGLE_KIND_KEY = 'Log3';
 export const ERROR_RESPONSES = {
   STORE_DATA_DOES_NOT_MATCH_TYPES: 'Data returned from the cloud store does not match expect type',
   COULD_NOT_FETCH_DATA: 'Could not fetch data from cloud',
+  COULD_NOT_SAVE_DATA: 'Error saving data to the cloud',
+  UNEXPECTED_ERROR_SEARCHING_KEY: 'Unexpected error trying to verify if entry already exists',
+  KEY_ALREADY_EXISTS: 'Saving for a date that already has an entry'
 }
 
 export const logEntryDataToWeightDTO = (entry: ILogEntryData): IWeightDTO => {
@@ -47,6 +50,8 @@ export const typeCheckEntriesAndFilterInvalid = (entries: any[], ): ILogEntryDat
 }
 
 export const metricsToLowerCaseList = (jsonState: Partial<Record<BooleanMetric, boolean>>): string[] => {
+  if (!jsonState) return [];
+
   return Object.entries(jsonState)
     .filter((state: [string, boolean]) => state[1])
     .map((state: [string, boolean]) => state[0].toLowerCase());

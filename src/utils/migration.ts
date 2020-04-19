@@ -1,6 +1,6 @@
 import * as dotenve from 'dotenv';
 import bodyParser from 'body-parser';
-import { ILogEntryData, ILogEntryDTO } from './interfaces';
+import { ILogEntryData, ILogEntryDTO } from '../interfaces';
 
 const Datastore = require('@google-cloud/datastore');
 const datastore = Datastore({

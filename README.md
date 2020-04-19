@@ -7,15 +7,15 @@ Outside of the fileds included in with this repo, an additional three addition t
 Anyone snooping on this project can create their own personal GCP project and reap the benefits of this 
 application by ensuring the three steps above are done.
 
-# log-back
+## log-back
 Back-end server for log.
 
-# Starting the application
+## Starting the application
 Consult `package.json` for a list of availbale commands. Some basic ones are:
 1. `npm start` - start the server
 2. `npm test` - run tests
 
-# Interacting with other applications
+## Interacting with other applications
 To allow this application to be hit by the mobile app, you can use a service like ngrok.
 ngrok will expose your port to the internet and allow connections from the web.
 

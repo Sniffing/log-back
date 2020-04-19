@@ -25,13 +25,21 @@ const datastore = new Datastore({
 
 app.get('/', (req: Request, res: Response) => {
   res.sendFile(join(__dirname,'/web-page/public/','index.html'));
-})
+});
 
 app.post('/', (req: Request, res: Response) => {
   const body = req.body;
   const data: ILogEntryDTO = formatData(body);
-  saveIfDoesNotExist(data, res);
-})
+
+  try {
+    saveIfDoesNotExist(data);
+    console.log("Saved data with key: ", data.key);
+    res.status(200).send(data);
+  } catch (error) {
+    console.error('Error saving data to db', error, data);
+    res.status(500).send(error);
+  }
+});
 
 app.get('/entries', async (req: Request, res: Response) => {
   const firstQuery = datastore.createQuery(GOOGLE_KIND_KEY)
@@ -57,7 +65,7 @@ app.get('/entries', async (req: Request, res: Response) => {
     console.error('Could not fetch date entries', error);
     res.status(500).send(ERROR_RESPONSES.COULD_NOT_FETCH_DATA);
   }  
-})
+});
 
 app.get('/weight', async (req: Request, res: Response) => {
   const query = datastore.createQuery(GOOGLE_KIND_KEY)
@@ -109,19 +117,23 @@ app.get('/text', async (req: Request, res: Response) => {
   }
 });
 
-const saveIfDoesNotExist = async (data: ILogEntryDTO, res: Response) => {
+const saveIfDoesNotExist = async (data: ILogEntryDTO) => {
+  let entry;
   try {
-    const entry = await datastore.get(data.key);
-    console.log(entry);
-  //   if (entry.length < 1 || (entry.length === 1 && entry[0] == undefined)) {
-  //     saveToCloud(data, res);
-  //   } else {
-  //     console.info("Entry already exists for date:", data.key.name);
-  //     res.send(false);
-  //   }
+    entry = await datastore.get(data.key);
   } catch (error) {
-    console.error("Error searching for key", data.key);
-    res.send(false);
+    throw new Error(ERROR_RESPONSES.UNEXPECTED_ERROR_SEARCHING_KEY);
+  }
+
+  if (entry.length < 1 || (entry.length === 1 && entry[0] == undefined)) {
+    try {
+      saveToCloud(data);
+    } catch (error) {
+      throw error;
+    }
+  } else {
+    console.error("Entry already exists for date:", data.key.name);
+    throw new Error(ERROR_RESPONSES.KEY_ALREADY_EXISTS);
   }
 }
 
@@ -132,20 +144,17 @@ const formatData = (state: ILogEntry): ILogEntryDTO => {
     key: datastore.key([GOOGLE_KIND_KEY, date]),
     data: {
       date,
-      weight: state.entryMetricState?.weight,
+      weight: state.entryMetricState?.weight || '',
       keywords: mergeWordMetrics(state.keywordsState, state.booleanMetricState),
       text: state.textState.data,
     }
   }
 }
 
-const saveToCloud = async (data: ILogEntryDTO, res: Response) => {
+const saveToCloud = async (data: ILogEntryDTO) => {
   try {
     await datastore.save(data);
-    res.status(200).send(`Saved ${data.data.date}`);
-    console.log("Saved data with key: ", data.key);
   } catch (error) {
-    console.error("Error while saving to google cloud:", error);
-    res.status(500).send(false);
+    throw new Error(ERROR_RESPONSES.COULD_NOT_SAVE_DATA);
   }
 }
