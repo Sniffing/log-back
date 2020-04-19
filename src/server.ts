@@ -127,7 +127,7 @@ const saveIfDoesNotExist = async (data: ILogEntryDTO) => {
 
   if (entry.length < 1 || (entry.length === 1 && entry[0] == undefined)) {
     try {
-      saveToCloud(data);
+      await saveToCloud(data);
     } catch (error) {
       throw error;
     }
