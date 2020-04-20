@@ -1,11 +1,12 @@
 ### Todos
-1. Implement a caching layer to prevent hitting quota. Each field written into counts as one operation,
-currently every refresh causes another call to read.
-2. The reulst from google cloud are paginated, need to account for this.
+1. ~~Implement a caching layer to prevent hitting quota. Each field written into counts as one operation,
+currently every refresh causes another call to read.~~
+2. The result from google cloud are paginated, need to account for this.
 3. Implement end point for life events
 4. Review use of async await everywhere
 5. review `saveEntry` function in `LogEntryService.ts`
 6. Review repeated cache code in `LogEntryService.ts`
+7. Review caching for the simple get all query on both text and keywords, should cache that too?
 
 # Set up
 Outside of the fileds included in with this repo, an additional three addition things are needed:
