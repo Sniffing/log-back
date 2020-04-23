@@ -10,30 +10,53 @@ export class CachingService implements ICachingService {
     this.timeToLiveInHours = timeToLiveinHours;
   }
 
-  public getDataIfInCache = (endpoint: ApiEndpoint): any | undefined =>  {
-    if (this.cache.hasOwnProperty(endpoint) && this.isValidCacheTime(this.cache[endpoint])) {
-      return this.cache[endpoint].data; 
-    }
-    return;
+  public get = (endpoint: ApiEndpoint) => {
+    return this.cache[endpoint]?.data;
   }
 
-  public entryExists = (endpoint: ApiEndpoint): boolean => {
+  public canGetCache = (endpoint: ApiEndpoint) => {
+    return this.doesCacheExist(endpoint) && !this.isCacheExpired(endpoint);
+  }
+
+  public doesCacheExist = (endpoint: ApiEndpoint): boolean => {
     return this.cache.hasOwnProperty(endpoint);
   }
 
-  public addToCache = (endpoint: ApiEndpoint, data: any) => {
+  public isCacheExpired = (endpoint: ApiEndpoint): boolean => {
+    return !this.isValidCacheTime(this.cache[endpoint], new Date());
+  }
+
+  public add = (endpoint: ApiEndpoint, data: any) => {
     this.cache[endpoint] = {
       data,
       cacheTime: new Date(),
     };
   }
 
-  public resetCache = () => {
+  public reset = () => {
     this.cache = {};
   }
+
+  public size = () => { 
+    return Object.keys(this.cache).length;
+  }
   
-  private isValidCacheTime = (cachedEntry: ICacheable): boolean => {
-    const now = new Date();
-    return (now.getHours() - cachedEntry.cacheTime.getHours()) < this.timeToLiveInHours;
+  private isValidCacheTime = (cachedEntry: ICacheable, now: Date): boolean => {
+    if (cachedEntry.cacheTime > now) {
+      return false;
+    }
+
+    if (cachedEntry.cacheTime.getDay() !== now.getDay()) {
+      return (now.getHours() + 24) - cachedEntry.cacheTime.getHours() < this.timeToLiveInHours;
+    }
+
+    const hourDiff = now.getHours() - cachedEntry.cacheTime.getHours();
+    console.log("diff", hourDiff, now, cachedEntry.cacheTime);
+    
+    if (hourDiff < 0) {
+      return (now.getHours() + 24) - cachedEntry.cacheTime.getHours() < this.timeToLiveInHours;
+    } else {
+      return hourDiff < this.timeToLiveInHours;
+    }
   }
 }

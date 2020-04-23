@@ -1,8 +1,11 @@
 import { ApiEndpoint, ICacheable } from "./interfaces";
 
 export interface ICachingService {
-  getDataIfInCache: (endpoint: ApiEndpoint) => any | undefined;
-  addToCache: (endpoint: ApiEndpoint, data: any) => void;
-  resetCache: () => void;
-  entryExists: (endpoint: ApiEndpoint) => boolean;
+  get: (endpoint: ApiEndpoint) => any;
+  canGetCache: (endpoint: ApiEndpoint) => boolean;
+  add: (endpoint: ApiEndpoint, data: any) => void;
+  reset: () => void;
+  doesCacheExist: (endpoint: ApiEndpoint) => boolean;
+  isCacheExpired: (endpoint: ApiEndpoint) => boolean;
+  size: () => number;
 }
