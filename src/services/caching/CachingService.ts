@@ -51,7 +51,6 @@ export class CachingService implements ICachingService {
     }
 
     const hourDiff = now.getHours() - cachedEntry.cacheTime.getHours();
-    console.log("diff", hourDiff, now, cachedEntry.cacheTime);
     
     if (hourDiff < 0) {
       return (now.getHours() + 24) - cachedEntry.cacheTime.getHours() < this.timeToLiveInHours;

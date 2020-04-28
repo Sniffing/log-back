@@ -31,8 +31,7 @@
     "typescript": "^3.8.3"
   },
   "scripts": {
-    "test": "jest server/*",
-    "jest": "jest",
+    "test": "jest",
     "test:watch": "jest server/* --watch",
     "start": "tsc && nodemon --exec babel-node dist/server.js",
     "build": "rm -rf dist && tsc",
