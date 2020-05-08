@@ -1,9 +1,9 @@
 import { IEventEntryService } from './IEventEntryService';
-import { IEventEntrySearchParams, ILifeEvent } from './interfaces';
+import { IEventEntrySearchParams, ILifeEvent, ILifeEventDTO } from './interfaces';
 import { ICachingService } from '../caching/ICachingService';
 import { Datastore } from '@google-cloud/datastore';
 import { ApiEndpoint } from '../caching/interfaces';
-import {  GOOGLE_EVENT_ENTRY_KEY } from '../../constants';
+import {  GOOGLE_EVENT_ENTRY_KEY, ERROR_RESPONSES } from '../../constants';
 import { RunQueryResponse } from '@google-cloud/datastore/build/src/query';
 import { typeCheckEventsAndFilterInvalid } from './constants';
 
@@ -32,7 +32,22 @@ export class EventEntryService implements IEventEntryService {
     return result;
   }
 
-  public saveEvent(event: ILifeEvent) {
+  public saveEvent = async (event: ILifeEvent) => {
+    const dto = this.formatData(event);
+    try {
+      return await this.datastore.save(dto);
+    } catch (error) {
+      console.error("Error in saving to datastore:", error);
+      throw new Error(ERROR_RESPONSES.COULD_NOT_SAVE_DATA);
+    }
+  }
 
+  private formatData = (event: ILifeEvent): ILifeEventDTO => {
+    return {
+      key: this.datastore.key([GOOGLE_EVENT_ENTRY_KEY]),
+      data: {
+         ...event
+      }
+    }
   }
 }

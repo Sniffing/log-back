@@ -3,8 +3,6 @@ import { isTypeILifeEvent, ILifeEvent } from './interfaces';
 export const typeCheckEventsAndFilterInvalid = (entries: any[]): ILifeEvent[] => {
   const typeMismatchedResults = new Set<string>();
 
-  console.log('some entries?', entries);
-
   const validEntries = entries.filter((entry: any) => {
     const isCorrectType = isTypeILifeEvent(entry);
     if (!isCorrectType) {

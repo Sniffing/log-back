@@ -125,18 +125,17 @@ app.get('/flushCache', (req: Request, res: Response) => {
   res.status(200).send("Flushed");
 })
 
-app.post('/lifeEvent', (req: Request, res: Response) => {
+app.post('/lifeEvent', async (req: Request, res: Response) => {
   const body = req.body;
-
   const data: ILifeEvent = body as ILifeEvent;
 
   try {
-    //TODO: Log life event
-    // console.log("Saved data with key: ", data.key);
-    // res.status(200).send(data);
+    await eventEntryService.saveEvent(data);
+    console.log("Saved event ", data);
+    res.status(200).send(data);
   } catch (error) {
-    // console.error('Error saving data to db', error, data);
-    // res.status(500).send(error);
+    console.error('Error saving data to db', error, data);
+    res.status(500).send(error);
   }
 });
 
