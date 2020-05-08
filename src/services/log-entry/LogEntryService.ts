@@ -2,7 +2,7 @@ import { ICachingService } from "../caching/ICachingService";
 import { ILogEntryService } from "./ILogEntryService";
 import { IWeightDTO, IKeywordDTO, ITextDTO, ILogEntryDTO, ILogEntry } from "../../interfaces";
 import { Datastore } from "@google-cloud/datastore";
-import { GOOGLE_KIND_KEY, typeCheckEntriesAndFilterInvalid, logEntryDataToKeywordDTO, logEntryDataToWeightDTO, logEntryDataToTextDTO, ERROR_RESPONSES, reverseDate, mergeWordMetrics } from "../../constants";
+import { GOOGLE_LOG_ENTRY_KEY, typeCheckEntriesAndFilterInvalid, logEntryDataToKeywordDTO, logEntryDataToWeightDTO, logEntryDataToTextDTO, ERROR_RESPONSES, reverseDate, mergeWordMetrics } from "../../constants";
 import { RunQueryResponse } from "@google-cloud/datastore/build/src/query";
 import { ApiEndpoint } from "../caching/interfaces";
 import { entity } from '@google-cloud/datastore/build/src/entity';
@@ -49,7 +49,7 @@ export class LogEntryService implements ILogEntryService {
       return this.cache.get(ApiEndpoint.GET_WEIGHT_ENTRIES) as IWeightDTO[];
     }
 
-    const query = this.datastore.createQuery(GOOGLE_KIND_KEY)
+    const query = this.datastore.createQuery(GOOGLE_LOG_ENTRY_KEY)
                         .filter('weight', ">", "0");
     const entries: RunQueryResponse = await query.run();
     const result: IWeightDTO[] = typeCheckEntriesAndFilterInvalid(entries[0])
@@ -65,7 +65,7 @@ export class LogEntryService implements ILogEntryService {
       return this.cache.get(ApiEndpoint.GET_KEYWORD_ENTRIES) as IKeywordDTO[];
     }
 
-    const query = this.datastore.createQuery(GOOGLE_KIND_KEY);
+    const query = this.datastore.createQuery(GOOGLE_LOG_ENTRY_KEY);
     const entries: RunQueryResponse = await query.run();
     let result: IKeywordDTO[] = typeCheckEntriesAndFilterInvalid(entries[0])
       .map(logEntryDataToKeywordDTO);
@@ -80,7 +80,7 @@ export class LogEntryService implements ILogEntryService {
       return this.cache.get(ApiEndpoint.GET_TEXT_ENTRIES) as ITextDTO[];
     }
   
-    const query = this.datastore.createQuery(GOOGLE_KIND_KEY);
+    const query = this.datastore.createQuery(GOOGLE_LOG_ENTRY_KEY);
     const entries: RunQueryResponse = await query.run();
     const result: ITextDTO[] = typeCheckEntriesAndFilterInvalid(entries[0])
       .map(logEntryDataToTextDTO);

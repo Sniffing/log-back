@@ -103,15 +103,3 @@ export type IBooleanMetrics = Partial<Record<BooleanMetric, boolean>>;
 export interface IEntryMetric {
   weight?: string;
 }
-
-export interface ILifeEvent {
-  name: string;
-  description?: string;
-  date: string;
-  endDate?: string;
-}
-export function isTypeILifeEvent(obj: any): obj is ILifeEvent {
-  if (obj === null || obj === undefined) return false;
-  const o = obj as ILifeEvent;
-  return !!o.name && !!o.date;
-}
