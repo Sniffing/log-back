@@ -4,7 +4,7 @@ export type nature = 'good' | 'bad';
 export interface ILifeEvent {
   name: string;
   description?: string;
-  date: string;
+  date: number; //unix time
   nature?: nature;
   intensity: number; //should be max 10, minimum 1.
   //10 should be huge say hospitalised vs getting married

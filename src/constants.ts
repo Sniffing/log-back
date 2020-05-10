@@ -1,5 +1,4 @@
 import { ILogEntryData, IWeightDTO, IKeywordDTO, ITextDTO, isTypeILogEntryData, BooleanMetric, IKeyword, IBooleanMetrics } from './interfaces';
-import { ILifeEvent, isTypeILifeEvent } from './services/event-entry/interfaces';
 
 export const GOOGLE_LOG_ENTRY_KEY = 'Log3';
 export const GOOGLE_EVENT_ENTRY_KEY = 'Event';
