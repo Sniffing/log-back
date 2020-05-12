@@ -17,20 +17,19 @@ app.use(json()); // for parsing application/json
 app.use(urlencoded({ extended: true }));
 
 router.get('/', (req: Request, res: Response) => {
-  res.sendFile(join(__dirname,'/web-page/public/','index.html'));
+	res.sendFile(join(__dirname,'/web-page/public/','index.html'));
 });
 
 app.use('/logEntries', LogEntriesApi);
 app.use('/lifeEvents', LifeEventsApi);
 
 app.get('/flushCache', (req: Request, res: Response) => {
-  services.resetCache();
-  console.log("Cache flushed")
-  res.status(200).send("Flushed");
-})
-
+	services.resetCache();
+	console.log('Cache flushed');
+	res.status(200).send('Flushed');
+});
 
 app.listen(port, () => {
-  console.info(`Third Eye listening on port ${port}!`)
-  console.info(`Be sure to run 'ngrok http ${port}'`);
+	console.info(`Third Eye listening on port ${port}!`);
+	console.info(`Be sure to run 'ngrok http ${port}'`);
 });

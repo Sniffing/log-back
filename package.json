@@ -32,6 +32,8 @@
   },
   "scripts": {
     "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "lintfix": "eslint src/**/*.ts --fix",
     "test:watch": "jest server/* --watch",
     "start": "tsc && nodemon --exec babel-node dist/server.js",
     "build": "rm -rf dist && tsc",

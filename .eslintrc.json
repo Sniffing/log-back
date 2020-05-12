@@ -1,11 +1,10 @@
 {
-    "code": 80,
     "env": {
         "browser": true,
         "es6": true
     },
-    "extends": [
-        "eslint:recommended",
+    "extends":[
+        // "eslint:recommended", this breaks imported types
         "plugin:@typescript-eslint/eslint-recommended"
     ],
     "globals": {
@@ -18,10 +17,13 @@
         "sourceType": "module"
     },
     "plugins": [
-        "react",
         "@typescript-eslint"
     ],
     "rules": {
+        "max-len": [
+            "warn",
+            80
+        ],
         "indent": [
             "error",
             "tab"

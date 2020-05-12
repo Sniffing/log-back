@@ -8,7 +8,8 @@ export const ERROR_RESPONSES = {
   COULD_NOT_FETCH_DATA: 'Could not fetch data from cloud',
   COULD_NOT_SAVE_DATA: 'Error saving data to the cloud',
   UNEXPECTED_ERROR_SEARCHING_KEY: 'Unexpected error trying to verify if entry already exists',
-  KEY_ALREADY_EXISTS: 'Saving for a date that already has an entry'
+  KEY_ALREADY_EXISTS: 'Saving for a date that already has an entry',
+  INVALID_DATA: 'Invalid data sent in request body'
 }
 
 export const logEntryDataToWeightDTO = (entry: ILogEntryData): IWeightDTO => {
