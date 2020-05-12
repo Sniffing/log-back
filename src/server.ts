@@ -4,8 +4,7 @@ import express from 'express';
 import { Request, Response } from 'express';
 import { json, urlencoded } from 'body-parser';
 import { Services } from './services/services';
-import lifeEventApi from './endpoints/lifeEvents';
-import logEntryApi from './endpoints/logEntries';
+import { LifeEventsApi, LogEntriesApi } from './endpoints';
 
 dotenv.config();
 const app = express();
@@ -21,8 +20,8 @@ router.get('/', (req: Request, res: Response) => {
   res.sendFile(join(__dirname,'/web-page/public/','index.html'));
 });
 
-app.use('/logEntries', logEntryApi);
-app.use('/lifeEvents', lifeEventApi);
+app.use('/logEntries', LogEntriesApi);
+app.use('/lifeEvents', LifeEventsApi);
 
 app.get('/flushCache', (req: Request, res: Response) => {
   services.resetCache();

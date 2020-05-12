@@ -1,6 +1,6 @@
 ### Todos
 1. The result from google cloud are paginated, need to account for this.
-2. Implement end point for life events
+~~2. Implement end point for life events~~
 3. Review caching for the simple get all query on both text and keywords, should cache that too?
 
 # Set up

@@ -94,4 +94,4 @@ const formatData = (state: ILogEntry): ILogEntryDTO => {
   }
 }
 
-export default router;
+export { router as LogEntriesApi };
