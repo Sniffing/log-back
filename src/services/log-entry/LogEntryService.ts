@@ -1,8 +1,8 @@
 import { ICachingService } from "../caching/ICachingService";
 import { ILogEntryService } from "./ILogEntryService";
-import { IWeightDTO, IKeywordDTO, ITextDTO, ILogEntryDTO, ILogEntry } from "../../interfaces";
+import { IWeightDTO, IKeywordDTO, ITextDTO, ILogEntryDTO } from "../../interfaces";
 import { Datastore } from "@google-cloud/datastore";
-import { GOOGLE_LOG_ENTRY_KEY, typeCheckEntriesAndFilterInvalid, logEntryDataToKeywordDTO, logEntryDataToWeightDTO, logEntryDataToTextDTO, ERROR_RESPONSES, reverseDate, mergeWordMetrics } from "../../constants";
+import { GOOGLE_LOG_ENTRY_KEY, typeCheckEntriesAndFilterInvalid, logEntryDataToKeywordDTO, logEntryDataToWeightDTO, logEntryDataToTextDTO, ERROR_RESPONSES } from "../../constants";
 import { RunQueryResponse } from "@google-cloud/datastore/build/src/query";
 import { ApiEndpoint } from "../caching/interfaces";
 import { entity } from '@google-cloud/datastore/build/src/entity';
