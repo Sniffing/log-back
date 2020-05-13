@@ -1,4 +1,4 @@
-import { ApiEndpoint, ICacheable } from "./interfaces";
+import { ApiEndpoint } from './interfaces';
 
 export interface ICachingService {
   get: (endpoint: ApiEndpoint) => any;

@@ -5,6 +5,7 @@ import { Request, Response } from 'express';
 import { json, urlencoded } from 'body-parser';
 import { Services } from './services/services';
 import { LifeEventsApi, LogEntriesApi } from './endpoints';
+import { CalorieEntriesApi } from './endpoints/calories';
 
 dotenv.config();
 const app = express();
@@ -22,6 +23,7 @@ router.get('/', (req: Request, res: Response) => {
 
 app.use('/logEntries', LogEntriesApi);
 app.use('/lifeEvents', LifeEventsApi);
+app.use('/calories', CalorieEntriesApi);
 
 app.get('/flushCache', (req: Request, res: Response) => {
 	services.resetCache();

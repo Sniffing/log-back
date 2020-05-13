@@ -5,6 +5,8 @@ export enum ApiEndpoint {
   GET_KEYWORD_ENTRIES,
 
   GET_LIFE_EVENTS,
+
+  GET_CALORIE_ENTRIES,
 }
 
 export type DataCache = Record<ApiEndpoint, ICacheable>;

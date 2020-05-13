@@ -3,6 +3,7 @@ import { CachingService } from './caching/CachingService';
 import { LogEntryService } from './log-entry/LogEntryService';
 import { EventEntryService } from './event-entry/EventEntryService';
 import { entity } from '@google-cloud/datastore/build/src/entity';
+import { CalorieEntryService } from './calorie-entry/CalorieEntryService';
 
 export class Services {
 
@@ -11,6 +12,7 @@ export class Services {
 
   private _logEntryService: LogEntryService;
   private _eventEntryService: EventEntryService;
+  private _calorieEntryService: CalorieEntryService;
 
   public constructor(appId: string) {
   	this.datastore = new Datastore({
@@ -21,6 +23,7 @@ export class Services {
 
   	this._logEntryService = new LogEntryService(this.cache, this.datastore);
   	this._eventEntryService = new EventEntryService(this.cache, this.datastore);
+  	this._calorieEntryService = new CalorieEntryService(this.cache, this.datastore);
   }
 
   public get logEntryService(): LogEntryService {
@@ -29,6 +32,10 @@ export class Services {
 
   public get eventEntryService(): EventEntryService {
   	return this._eventEntryService;
+  }
+
+  public get calorieEntryService(): CalorieEntryService {
+  	return this._calorieEntryService;
   }
 
   public resetCache(): void {

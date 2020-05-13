@@ -1,13 +1,13 @@
-import { IEventEntryService } from './IEventEntryService';
-import { IEventEntrySearchParams, ILifeEvent, ILifeEventDTO } from './interfaces';
+import { ICalorieEntryDTO, ICalorieEntry } from './interfaces';
 import { ICachingService } from '../caching/ICachingService';
 import { Datastore } from '@google-cloud/datastore';
 import { ApiEndpoint } from '../caching/interfaces';
-import {  GOOGLE_EVENT_ENTRY_KEY, ERROR_RESPONSES } from '../../constants';
+import { GOOGLE_EVENT_ENTRY_KEY, ERROR_RESPONSES, GOOGLE_EVENT_CALORIES_KEY } from '../../constants';
 import { RunQueryResponse } from '@google-cloud/datastore/build/src/query';
-import { typeCheckEventsAndFilterInvalid } from './constants';
+import { typeCheckCaloriesAndFilterInvalid } from './constants';
+import { ICalorieEntryService } from './ICalorieEntryService';
 
-export class EventEntryService implements IEventEntryService {
+export class CalorieEntryService implements ICalorieEntryService {
   private cache: ICachingService;
   private datastore: Datastore;
 
@@ -16,24 +16,24 @@ export class EventEntryService implements IEventEntryService {
   	this.datastore = datastore;
   }
   
-  public fetchEvents =  async (params: IEventEntrySearchParams = {}): Promise<ILifeEvent[]> => {
-  	const cacheKey = ApiEndpoint.GET_LIFE_EVENTS;
+  public fetchCalories =  async (): Promise<ICalorieEntry[]> => {
+  	const cacheKey = ApiEndpoint.GET_CALORIE_ENTRIES;
   	if (this.cache.canGetCache(cacheKey)) {
   		console.log('Using cached values for Life events');
-  		return this.cache.get(cacheKey) as ILifeEvent[];
+  		return this.cache.get(cacheKey) as ICalorieEntry[];
   	}
 
-  	const query = this.datastore.createQuery(GOOGLE_EVENT_ENTRY_KEY);
+  	const query = this.datastore.createQuery(GOOGLE_EVENT_CALORIES_KEY);
   	const entries: RunQueryResponse = await query.run();
 
-  	const result: ILifeEvent[] = typeCheckEventsAndFilterInvalid(entries[0]);
+  	const result: ICalorieEntry[] = typeCheckCaloriesAndFilterInvalid(entries[0]);
 
   	this.cache.add(cacheKey, result); 
   	return result;
   }
 
-  public saveEvent = async (event: ILifeEvent) => {
-  	const dto = this.formatData(event);
+  public saveCalories = async (calorie: ICalorieEntry) => {
+  	const dto = this.formatData(calorie);
   	try {
   		return await this.datastore.save(dto);
   	} catch (error) {
@@ -42,11 +42,11 @@ export class EventEntryService implements IEventEntryService {
   	}
   }
 
-  private formatData = (event: ILifeEvent): ILifeEventDTO => {
+  private formatData = (calorie: ICalorieEntry): ICalorieEntryDTO => {
   	return {
   		key: this.datastore.key([GOOGLE_EVENT_ENTRY_KEY]),
   		data: {
-  			...event
+  			...calorie
   		}
   	};
   }

@@ -1,10 +1,10 @@
-import { isTypeILifeEvent, ILifeEvent } from './interfaces';
+import { isTypeICalorieEntry, ICalorieEntry } from './interfaces';
 
-export const typeCheckEventsAndFilterInvalid = (entries: any[]): ILifeEvent[] => {
+export const typeCheckCaloriesAndFilterInvalid = (entries: any[]): ICalorieEntry[] => {
 	const typeMismatchedResults = new Set<string>();
 
 	const validEntries = entries.filter((entry: any) => {
-		const isCorrectType = isTypeILifeEvent(entry);
+		const isCorrectType = isTypeICalorieEntry(entry);
 		if (!isCorrectType) {
 			typeMismatchedResults.add(entry.date);
 		}
