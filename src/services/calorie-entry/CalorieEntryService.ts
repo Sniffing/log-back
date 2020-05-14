@@ -44,7 +44,7 @@ export class CalorieEntryService implements ICalorieEntryService {
 
   private formatData = (calorie: ICalorieEntry): ICalorieEntryDTO => {
   	return {
-  		key: this.datastore.key([GOOGLE_EVENT_ENTRY_KEY]),
+  		key: this.datastore.key([GOOGLE_EVENT_CALORIES_KEY]),
   		data: {
   			...calorie
   		}
