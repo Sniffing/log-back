@@ -71,6 +71,9 @@
   "jest": {
     "setupFiles": [
       "jest-date-mock"
+    ],
+    "testPathIgnorePatterns": [
+      "dist"
     ]
   },
   "importSort": {
