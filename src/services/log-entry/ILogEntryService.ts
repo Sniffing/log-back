@@ -1,9 +1,9 @@
-import { IKeywordDTO, ITextDTO, IWeightDTO, ILogEntryDTO } from "../../interfaces";
+import { IKeywordDTO, ILogEntry, ITextDTO, IWeightDTO } from '../../interfaces';
 
 export interface ILogEntryService {
   getWeight: () => Promise<IWeightDTO[]>;
   getKeywords: () => Promise<IKeywordDTO[]>;
   getText: () => Promise<ITextDTO[]>;
 
-  saveEntry: (data: ILogEntryDTO) => void;
+  saveEntry: (data: ILogEntry) => void;
 }

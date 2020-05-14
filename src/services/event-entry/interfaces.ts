@@ -13,8 +13,8 @@ export interface ILifeEvent {
 }
 
 export interface ILifeEventDTO {
-  key: entity.Key,
-  data: ILifeEvent
+  key: entity.Key;
+  data: ILifeEvent;
 }
 
 export function isTypeILifeEvent(obj: any): obj is ILifeEvent {

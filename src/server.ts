@@ -1,11 +1,12 @@
-import dotenv from 'dotenv';
-import { join } from 'path';
-import express from 'express';
+import { LifeEventsApi, LogEntriesApi } from './endpoints';
 import { Request, Response } from 'express';
 import { json, urlencoded } from 'body-parser';
-import { Services } from './services/services';
-import { LifeEventsApi, LogEntriesApi } from './endpoints';
+
 import { CalorieEntriesApi } from './endpoints/calories';
+import { Services } from './services/services';
+import dotenv from 'dotenv';
+import express from 'express';
+import { join } from 'path';
 
 dotenv.config();
 const app = express();
@@ -18,7 +19,7 @@ app.use(json()); // for parsing application/json
 app.use(urlencoded({ extended: true }));
 
 router.get('/', (req: Request, res: Response) => {
-	res.sendFile(join(__dirname,'/web-page/public/','index.html'));
+  res.sendFile(join(__dirname, '/web-page/public/', 'index.html'));
 });
 
 app.use('/logEntries', LogEntriesApi);
@@ -26,12 +27,12 @@ app.use('/lifeEvents', LifeEventsApi);
 app.use('/calories', CalorieEntriesApi);
 
 app.get('/flushCache', (req: Request, res: Response) => {
-	services.resetCache();
-	console.log('Cache flushed');
-	res.status(200).send('Flushed');
+  services.resetCache();
+  console.log('Cache flushed');
+  res.status(200).send('Flushed');
 });
 
 app.listen(port, () => {
-	console.info(`Third Eye listening on port ${port}!`);
-	console.info(`Be sure to run 'ngrok http ${port}'`);
+  console.info(`Third Eye listening on port ${port}!`);
+  console.info(`Be sure to run 'ngrok http ${port}'`);
 });
