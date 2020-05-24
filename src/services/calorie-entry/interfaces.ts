@@ -7,12 +7,12 @@ export interface ICalorieEntry {
 }
 
 export interface ICalorieEntryDTO {
-  key: entity.Key,
-  data: ICalorieEntry
+  key: entity.Key;
+  data: ICalorieEntry;
 }
 
 export function isTypeICalorieEntry(obj: any): obj is ICalorieEntry {
-	if (obj === null || obj === undefined) return false;
-	const o = obj as ICalorieEntry;
-	return !!o.calories && !!o.date;
+  if (obj === null || obj === undefined) return false;
+  const o = obj as ICalorieEntry;
+  return !!o.calories && !!o.date;
 }

@@ -26,7 +26,6 @@ export class EventEntryService implements IEventEntryService {
   ): Promise<ILifeEvent[]> => {
     const cacheKey = ApiEndpoint.GET_LIFE_EVENTS;
     if (this.cache.canGetCache(cacheKey)) {
-      console.log('Using cached values for Life events');
       return this.cache.get(cacheKey) as ILifeEvent[];
     }
 

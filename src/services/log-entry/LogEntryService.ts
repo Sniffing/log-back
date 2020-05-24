@@ -1,3 +1,4 @@
+import { Datastore, Query } from '@google-cloud/datastore';
 import {
   ERROR_RESPONSES,
   GOOGLE_LOG_ENTRY_KEY,
@@ -6,7 +7,6 @@ import {
   logEntryDataToWeightDTO,
   mergeWordMetrics,
   reverseDate,
-  typeCheckEntriesAndFilterInvalid,
 } from '../../constants';
 import {
   IKeywordDTO,
@@ -17,11 +17,10 @@ import {
 } from '../../interfaces';
 
 import { ApiEndpoint } from '../caching/interfaces';
-import { Datastore } from '@google-cloud/datastore';
 import { ICachingService } from '../caching/ICachingService';
 import { ILogEntryService } from './ILogEntryService';
-import { RunQueryResponse } from '@google-cloud/datastore/build/src/query';
 import { entity } from '@google-cloud/datastore/build/src/entity';
+import { queryAndFormat } from './constants';
 import { services } from '../../server';
 
 export class LogEntryService implements ILogEntryService {
@@ -62,53 +61,45 @@ export class LogEntryService implements ILogEntryService {
   };
 
   public getWeight = async (): Promise<IWeightDTO[]> => {
-    if (this.cache.canGetCache(ApiEndpoint.GET_WEIGHT_ENTRIES)) {
-      console.log('Using cached values for weight');
-      return this.cache.get(ApiEndpoint.GET_WEIGHT_ENTRIES) as IWeightDTO[];
-    }
-
-    const query = this.datastore
-      .createQuery(GOOGLE_LOG_ENTRY_KEY)
-      .filter('weight', '>', '0');
-    const entries: RunQueryResponse = await query.run();
-    const result: IWeightDTO[] = typeCheckEntriesAndFilterInvalid(
-      entries[0],
-    ).map(logEntryDataToWeightDTO);
-
-    this.cache.add(ApiEndpoint.GET_WEIGHT_ENTRIES, result);
-    return result;
+    return await this.getData<IWeightDTO>(
+      this.defaultQuery().filter('weight', '>', '0'),
+      ApiEndpoint.GET_WEIGHT_ENTRIES,
+      logEntryDataToWeightDTO,
+    );
   };
 
   public getKeywords = async (): Promise<IKeywordDTO[]> => {
-    if (this.cache.canGetCache(ApiEndpoint.GET_KEYWORD_ENTRIES)) {
-      console.log('Using cached values for keywords');
-      return this.cache.get(ApiEndpoint.GET_KEYWORD_ENTRIES) as IKeywordDTO[];
-    }
-
-    const query = this.datastore.createQuery(GOOGLE_LOG_ENTRY_KEY);
-    const entries: RunQueryResponse = await query.run();
-    let result: IKeywordDTO[] = typeCheckEntriesAndFilterInvalid(
-      entries[0],
-    ).map(logEntryDataToKeywordDTO);
-
-    this.cache.add(ApiEndpoint.GET_KEYWORD_ENTRIES, result);
-    return result;
+    return await this.getData<IKeywordDTO>(
+      this.defaultQuery(),
+      ApiEndpoint.GET_KEYWORD_ENTRIES,
+      logEntryDataToKeywordDTO,
+    );
   };
 
   public getText = async (): Promise<ITextDTO[]> => {
-    if (this.cache.canGetCache(ApiEndpoint.GET_TEXT_ENTRIES)) {
-      console.log('Using cached values for text');
-      return this.cache.get(ApiEndpoint.GET_TEXT_ENTRIES) as ITextDTO[];
-    }
-
-    const query = this.datastore.createQuery(GOOGLE_LOG_ENTRY_KEY);
-    const entries: RunQueryResponse = await query.run();
-    const result: ITextDTO[] = typeCheckEntriesAndFilterInvalid(entries[0]).map(
+    return await this.getData<ITextDTO>(
+      this.defaultQuery(),
+      ApiEndpoint.GET_TEXT_ENTRIES,
       logEntryDataToTextDTO,
     );
+  };
 
-    this.cache.add(ApiEndpoint.GET_TEXT_ENTRIES, result);
+  private async getData<T>(
+    query: Query,
+    endpoint: ApiEndpoint,
+    transformFn: any,
+  ): Promise<T[]> {
+    if (this.cache.canGetCache(endpoint)) {
+      return this.cache.get(endpoint) as T[];
+    }
+
+    const result = await queryAndFormat<T>(query, transformFn);
+    this.cache.add(endpoint, result);
     return result;
+  }
+
+  private defaultQuery = () => {
+    return this.datastore.createQuery(GOOGLE_LOG_ENTRY_KEY);
   };
 
   private formatData = (state: ILogEntry): ILogEntryDTO => {

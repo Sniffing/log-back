@@ -19,8 +19,8 @@ export class CalorieEntryService implements ICalorieEntryService {
 
   public fetchCalories = async (): Promise<ICalorieEntry[]> => {
     const cacheKey = ApiEndpoint.GET_CALORIE_ENTRIES;
+
     if (this.cache.canGetCache(cacheKey)) {
-      console.log('Using cached values for Calorie events');
       return this.cache.get(cacheKey) as ICalorieEntry[];
     }
 
@@ -36,9 +36,8 @@ export class CalorieEntryService implements ICalorieEntryService {
   };
 
   public saveCalories = async (calorie: ICalorieEntry) => {
-    const dto = this.formatData(calorie);
     try {
-      return await this.datastore.save(dto);
+      return await this.datastore.save(this.formatData(calorie));
     } catch (error) {
       console.error('Error in saving to datastore:', error);
       throw new Error(ERROR_RESPONSES.COULD_NOT_SAVE_DATA);
