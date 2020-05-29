@@ -46,7 +46,7 @@ export function isTypeILogEntryData(obj: any): obj is ILogEntryData {
   if (obj === null || obj === undefined) return false;
 
   const o = obj as ILogEntryData;
-  return !!o.date && !!o.weight && !!o.keywords && !!o.text;
+  return !!o.date && !!o.keywords && !!o.text;
 }
 
 export enum BooleanMetric {
