@@ -1,7 +1,5 @@
 ### Todos
-1. The result from google cloud are paginated, need to account for this.
-~~2. Implement end point for life events~~
-3. Review caching for the simple get all query on both text and keywords, should cache that too?
+1. Review caching for the simple get all query on both text and keywords, should cache that too?
 
 # Set up
 Outside of the fileds included in with this repo, an additional three addition things are needed:
@@ -9,7 +7,7 @@ Outside of the fileds included in with this repo, an additional three addition t
 2. `credentials.json` file which holds credentials for a service account for the google app/
 3. Export `GOOGLE_APPLICATION_CREDENTIALS` in `~/.bash_profile` and set it to the location of `credentials.json`
 
-Anyone snooping on this project can create their own personal GCP project and reap the benefits of this 
+Anyone snooping on this project can create their own personal GCP project and reap the benefits of this
 application by ensuring the three steps above are done.
 
 ## log-back

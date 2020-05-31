@@ -15,12 +15,12 @@ import {
   ITextDTO,
   IWeightDTO,
 } from '../../interfaces';
+import { queryAndFormat, resolvedEndpoints } from './constants';
 
 import { ApiEndpoint } from '../caching/interfaces';
 import { ICachingService } from '../caching/ICachingService';
 import { ILogEntryService } from './ILogEntryService';
 import { entity } from '@google-cloud/datastore/build/src/entity';
-import { queryAndFormat } from './constants';
 import { services } from '../../server';
 
 export class LogEntryService implements ILogEntryService {
@@ -89,12 +89,16 @@ export class LogEntryService implements ILogEntryService {
     endpoint: ApiEndpoint,
     transformFn: any,
   ): Promise<T[]> {
-    if (this.cache.canGetCache(endpoint)) {
-      return this.cache.get(endpoint) as T[];
+    const resolvedEndpoint = resolvedEndpoints[endpoint]
+      ? resolvedEndpoints[endpoint]
+      : endpoint;
+
+    if (this.cache.canGetCache(resolvedEndpoint)) {
+      return this.cache.get(resolvedEndpoint) as T[];
     }
 
     const result = await queryAndFormat<T>(query, transformFn);
-    this.cache.add(endpoint, result);
+    this.cache.add(resolvedEndpoint, result);
     return result;
   }
 
