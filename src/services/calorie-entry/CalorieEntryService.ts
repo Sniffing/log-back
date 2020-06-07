@@ -1,4 +1,9 @@
-import { ERROR_RESPONSES, GOOGLE_EVENT_CALORIES_KEY } from '../../constants';
+import {
+  ERROR_RESPONSES,
+  GOOGLE_EVENT_CALORIES_KEY,
+  reverseDate,
+  unixTimeToDate,
+} from '../../constants';
 import { ICalorieEntry, ICalorieEntryDTO } from './interfaces';
 
 import { ApiEndpoint } from '../caching/interfaces';
@@ -45,8 +50,11 @@ export class CalorieEntryService implements ICalorieEntryService {
   };
 
   private formatData = (calorieEntry: ICalorieEntry): ICalorieEntryDTO => {
+    console.log('date', calorieEntry.date);
+    console.log('unix', unixTimeToDate(calorieEntry.date * 1000));
+    const stringDate = reverseDate(unixTimeToDate(calorieEntry.date * 1000));
     return {
-      key: this.datastore.key([GOOGLE_EVENT_CALORIES_KEY]),
+      key: this.datastore.key([GOOGLE_EVENT_CALORIES_KEY, stringDate]),
       data: {
         ...calorieEntry,
       },

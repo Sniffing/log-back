@@ -9,6 +9,8 @@ import {
   isTypeILogEntryData,
 } from './interfaces';
 
+import moment from 'moment';
+
 export const GOOGLE_LOG_ENTRY_KEY = 'Log3';
 export const GOOGLE_EVENT_ENTRY_KEY = 'Event';
 export const GOOGLE_EVENT_CALORIES_KEY = 'Calories';
@@ -78,7 +80,13 @@ export const metricsToLowerCaseList = (
     .map((state: [string, boolean]) => state[0].toLowerCase());
 };
 
-//Convert american date into correct date reversed for lexicographic ordering
+export const unixTimeToDate = (time: number) => {
+  const date = moment(time).utc();
+  const m = date.month() + 1;
+  const month = m >= 10 ? m : '0' + m;
+  return `${('0' + date.date()).slice(-2)}-${month}-${date.year()}`;
+};
+
 export const reverseDate = (date: string) => {
   let parts = date.split('-');
   return parts[2] + '-' + parts[1] + '-' + parts[0];
