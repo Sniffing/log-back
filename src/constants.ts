@@ -92,6 +92,17 @@ export const reverseDate = (date: string) => {
   return parts[2] + '-' + parts[1] + '-' + parts[0];
 };
 
+export const toDate = (yyyymmdd: string) => {
+  const parts = yyyymmdd.split('-');
+  const date = new Date(
+    parseInt(parts[0]),
+    parseInt(parts[1]) - 1,
+    parseInt(parts[2]),
+  );
+
+  return date;
+};
+
 const lowerCaseAll = (things: string[]) => {
   return things.map((k) => k.toLowerCase());
 };

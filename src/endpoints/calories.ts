@@ -5,6 +5,7 @@ import {
 import { Request, Response } from 'express';
 
 import { ERROR_RESPONSES } from '../constants';
+import { UploadedFile } from 'express-fileupload';
 import express from 'express';
 import { services } from '../server';
 
@@ -38,6 +39,30 @@ router.post('/', async (req: Request, res: Response) => {
     console.error('Error saving data to db', error, data);
     res.status(500).send(error);
   }
+});
+
+router.post('/upload', async (req: Request, res: Response) => {
+  if (!req.files || Object.keys(req.files).length !== 1) {
+    res.status(500).send('No file sent');
+  }
+  console.log(req.files.file);
+  const csv = req.files.file as UploadedFile;
+  const uploadPath = __dirname + '/files/' + csv.name;
+
+  csv.mv(uploadPath, (err) => {
+    if (err) {
+      console.log('err', err);
+      // res.status(500).send(err);
+    }
+  });
+
+  try {
+    await services.calorieEntryService.uploadCaloriesFromCSV(uploadPath);
+  } catch (error) {
+    console.log(error);
+  }
+
+  res.status(200).send('oop');
 });
 
 export { router as CalorieEntriesApi };

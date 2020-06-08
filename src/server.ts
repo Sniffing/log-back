@@ -6,6 +6,7 @@ import { CalorieEntriesApi } from './endpoints/calories';
 import { Services } from './services/services';
 import dotenv from 'dotenv';
 import express from 'express';
+import fileUpload from 'express-fileupload';
 import { join } from 'path';
 
 dotenv.config();
@@ -17,6 +18,13 @@ export const services = new Services(process.env.APP_ID);
 
 app.use(json()); // for parsing application/json
 app.use(urlencoded({ extended: true }));
+app.use(
+  fileUpload({
+    limits: { fileSize: 50 * 1024 * 1024 },
+    useTempFiles: true,
+    tempFileDir: '/tmp/',
+  }), //for uploading files
+);
 
 router.get('/', (req: Request, res: Response) => {
   res.sendFile(join(__dirname, '/web-page/public/', 'index.html'));

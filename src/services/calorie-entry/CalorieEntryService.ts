@@ -2,15 +2,18 @@ import {
   ERROR_RESPONSES,
   GOOGLE_EVENT_CALORIES_KEY,
   reverseDate,
+  toDate,
   unixTimeToDate,
 } from '../../constants';
 import { ICalorieEntry, ICalorieEntryDTO } from './interfaces';
 
 import { ApiEndpoint } from '../caching/interfaces';
+import CsvReadableStream from 'csv-reader';
 import { Datastore } from '@google-cloud/datastore';
 import { ICachingService } from '../caching/ICachingService';
 import { ICalorieEntryService } from './ICalorieEntryService';
 import { RunQueryResponse } from '@google-cloud/datastore/build/src/query';
+import fs from 'fs';
 import { typeCheckCaloriesAndFilterInvalid } from './constants';
 
 export class CalorieEntryService implements ICalorieEntryService {
@@ -47,6 +50,42 @@ export class CalorieEntryService implements ICalorieEntryService {
       console.error('Error in saving to datastore:', error);
       throw new Error(ERROR_RESPONSES.COULD_NOT_SAVE_DATA);
     }
+  };
+
+  public uploadCaloriesFromCSV = async (path: string) => {
+    // let inputStream = fs.createReadStream(path, 'utf8');
+    let inputStream = fs.createReadStream(
+      '/Users/terence/Downloads/test.csv',
+      'utf8',
+    );
+
+    const data: ICalorieEntry[] = [];
+
+    inputStream
+      .pipe(
+        new CsvReadableStream({
+          parseNumbers: true,
+          parseBooleans: true,
+          trim: true,
+        }),
+      )
+      .on('data', (val: any[]) => {
+        const key = val[0];
+        const calories = val[1];
+        const unixTime = toDate(key).getTime() / 1000;
+        data.push({
+          date: unixTime,
+          calories,
+        });
+      })
+      .on('end', async () => {
+        await Promise.all(data.map(this.uploadCalories));
+        console.log('uploaded');
+      });
+  };
+
+  private uploadCalories = async (entry: ICalorieEntry) => {
+    return this.saveCalories(entry);
   };
 
   private formatData = (calorieEntry: ICalorieEntry): ICalorieEntryDTO => {
