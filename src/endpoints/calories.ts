@@ -45,24 +45,15 @@ router.post('/upload', async (req: Request, res: Response) => {
   if (!req.files || Object.keys(req.files).length !== 1) {
     res.status(500).send('No file sent');
   }
-  console.log(req.files.file);
   const csv = req.files.file as UploadedFile;
-  const uploadPath = __dirname + '/files/' + csv.name;
-
-  csv.mv(uploadPath, (err) => {
-    if (err) {
-      console.log('err', err);
-      // res.status(500).send(err);
-    }
-  });
 
   try {
-    await services.calorieEntryService.uploadCaloriesFromCSV(uploadPath);
+    await services.calorieEntryService.uploadCaloriesFromCSV(csv);
+    res.status(200).send('Uploaded through csv');
   } catch (error) {
-    console.log(error);
+    console.error(error);
+    res.status(500).send('Error uploading from CSV');
   }
-
-  res.status(200).send('oop');
 });
 
 export { router as CalorieEntriesApi };

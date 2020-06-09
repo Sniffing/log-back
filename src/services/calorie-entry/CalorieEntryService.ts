@@ -13,6 +13,7 @@ import { Datastore } from '@google-cloud/datastore';
 import { ICachingService } from '../caching/ICachingService';
 import { ICalorieEntryService } from './ICalorieEntryService';
 import { RunQueryResponse } from '@google-cloud/datastore/build/src/query';
+import { UploadedFile } from 'express-fileupload';
 import fs from 'fs';
 import { typeCheckCaloriesAndFilterInvalid } from './constants';
 
@@ -52,12 +53,9 @@ export class CalorieEntryService implements ICalorieEntryService {
     }
   };
 
-  public uploadCaloriesFromCSV = async (path: string) => {
-    // let inputStream = fs.createReadStream(path, 'utf8');
-    let inputStream = fs.createReadStream(
-      '/Users/terence/Downloads/test.csv',
-      'utf8',
-    );
+  public uploadCaloriesFromCSV = async (csv: UploadedFile) => {
+    const path = csv.tempFilePath;
+    let inputStream = fs.createReadStream(path, 'utf8');
 
     const data: ICalorieEntry[] = [];
 
@@ -72,6 +70,7 @@ export class CalorieEntryService implements ICalorieEntryService {
       .on('data', (val: any[]) => {
         const key = val[0];
         const calories = val[1];
+        //TODO: standaradise milliseconds vs seconds across the app
         const unixTime = toDate(key).getTime() / 1000;
         data.push({
           date: unixTime,
@@ -80,7 +79,12 @@ export class CalorieEntryService implements ICalorieEntryService {
       })
       .on('end', async () => {
         await Promise.all(data.map(this.uploadCalories));
-        console.log('uploaded');
+        fs.unlink(path, (err) => {
+          if (err) {
+            console.error('COULD NOT DELETE', path);
+          }
+        });
+        console.log(`Uploaded ${data.length} entries through CSV`);
       });
   };
 
@@ -89,8 +93,6 @@ export class CalorieEntryService implements ICalorieEntryService {
   };
 
   private formatData = (calorieEntry: ICalorieEntry): ICalorieEntryDTO => {
-    console.log('date', calorieEntry.date);
-    console.log('unix', unixTimeToDate(calorieEntry.date * 1000));
     const stringDate = reverseDate(unixTimeToDate(calorieEntry.date * 1000));
     return {
       key: this.datastore.key([GOOGLE_EVENT_CALORIES_KEY, stringDate]),
