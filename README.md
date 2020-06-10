@@ -1,5 +1,5 @@
 ### Todos
-1. Review caching for the simple get all query on both text and keywords, should cache that too?
+1. Need to implement solution for bulk saving csv values, has a limite right now of about 240
 
 # Set up
 Outside of the fileds included in with this repo, an additional three addition things are needed:

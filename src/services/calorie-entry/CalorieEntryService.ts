@@ -78,7 +78,10 @@ export class CalorieEntryService implements ICalorieEntryService {
         });
       })
       .on('end', async () => {
-        await Promise.all(data.map(this.uploadCalories));
+        data.forEach((entry: ICalorieEntry) => {
+          this.uploadCalories(entry);
+        });
+
         fs.unlink(path, (err) => {
           if (err) {
             console.error('COULD NOT DELETE', path);
