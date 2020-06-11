@@ -1,5 +1,5 @@
 ### Todos
-1. Need to implement solution for bulk saving csv values, has a limite right now of about 240
+1. Need to implement solution for bulk saving csv values, has a limite right now of about 240 (https://github.com/googleapis/nodejs-firestore/issues/739)
 
 # Set up
 Outside of the fileds included in with this repo, an additional three addition things are needed:
