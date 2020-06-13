@@ -70,7 +70,7 @@ export class CalorieEntryService implements ICalorieEntryService {
       .on('data', (val: any[]) => {
         const key = val[0];
         const calories = val[1];
-        //TODO: standaradise milliseconds vs seconds across the app
+        //TODO: (USE NON 1000 THROUGHOUT APP)
         const unixTime = toDate(key).getTime() / 1000;
         data.push({
           date: unixTime,
