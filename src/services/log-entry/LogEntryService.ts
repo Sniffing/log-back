@@ -89,9 +89,10 @@ export class LogEntryService implements ILogEntryService {
     endpoint: ApiEndpoint,
     transformFn: any,
   ): Promise<T[]> {
-    const resolvedEndpoint = resolvedEndpoints[endpoint]
-      ? resolvedEndpoints[endpoint]
-      : endpoint;
+    // const resolvedEndpoint = resolvedEndpoints[endpoint]
+    //   ? resolvedEndpoints[endpoint]
+    //   : endpoint; //TODO DOESN'T CAPTURE CORRECTLY
+    const resolvedEndpoint = endpoint;
 
     if (this.cache.canGetCache(resolvedEndpoint)) {
       return this.cache.get(resolvedEndpoint) as T[];
